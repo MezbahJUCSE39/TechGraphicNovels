@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A comic that teaches logistic regression to beginners, starring Xiri and her calculator-robot Lino.">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>The Yes-or-No Machine</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=VT323&display=swap">
+<style>
+/* Layout: comic pages (white sheets, ink borders, offset shadow) on a navy halftone ground; 6-column panel grid that stacks on phones.
+   Single deliberate look (printed comic), so colors are fixed rather than theme-switched. */
+:root{
+  --ink:#0B1026; --navy:#16245E; --navy2:#22357F; --tint:#DCE4FF;
+  --yellow:#FFD23F; --yellow2:#FFE98A; --lemon:#B5E61D; --lemon2:#DDF59A;
+  --coral:#FF6B57; --white:#FFFFFF; --line:#FF2E93;
+  --disp:'Bangers','Impact','Arial Black',sans-serif;
+  --letter:'Comic Neue','Comic Sans MS','Chalkboard SE','Trebuchet MS',sans-serif;
+  --lcd:'VT323','Courier New',monospace;
+  color-scheme:light;
+}
+html{background:var(--navy)}
+body{
+  background-color:var(--navy);
+  background-image:radial-gradient(rgba(255,255,255,.08) 1.6px,transparent 1.8px);
+  background-size:14px 14px;
+  color:var(--ink); font-family:var(--letter); font-size:17px; line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:28px 64px;
+}
+.book{max-width:940px;margin:0 auto;display:grid;gap:44px}
+.page{
+  background:var(--white);border:4px solid var(--ink);box-shadow:10px 10px 0 var(--ink);
+  padding:14px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;
+}
+.panel{border:4px solid var(--ink);background:var(--white);overflow:hidden;min-width:0}
+.panel svg{display:block;width:100%;height:auto}
+.s6{grid-column:span 6}.s4{grid-column:span 4}.s3{grid-column:span 3}.s2{grid-column:span 2}
+.pgno{grid-column:1/-1;display:flex;justify-content:space-between;font-family:var(--disp);letter-spacing:.06em;font-size:15px;color:var(--navy);margin-top:-2px}
+svg text{font-family:var(--letter)}
+.lt{font-weight:400;fill:var(--ink)}
+.lt .b{font-weight:700;text-decoration:underline;text-decoration-thickness:2px}
+.disp{font-family:var(--disp);letter-spacing:.03em}
+.nt{font-family:var(--disp);letter-spacing:.05em;fill:var(--navy)}
+.lcd{font-family:var(--lcd);fill:var(--lemon)}
+.chalk{fill:#F4F7FF}
+/* contents strip */
+.toc{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:-20px}
+.toc a{font-family:var(--disp);letter-spacing:.05em;font-size:18px;color:var(--ink);background:var(--yellow);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:4px 12px;text-decoration:none}
+.toc a:hover,.toc a:focus-visible{background:var(--lemon);outline:none;transform:translate(-1px,-1px)}
+/* HTML pages: lab, cheat sheet, quiz */
+.hpage{background:var(--white);border:4px solid var(--ink);box-shadow:10px 10px 0 var(--ink);padding:22px}
+.hpage h2{font-family:var(--disp);font-weight:400;letter-spacing:.04em;font-size:clamp(34px,6vw,52px);line-height:1;margin:0 0 6px;text-wrap:balance}
+.hpage .kicker{font-family:var(--disp);letter-spacing:.08em;color:var(--coral);font-size:18px}
+.hpage p{max-width:65ch;margin:6px 0 14px}
+.lab{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;align-items:start}
+.lab svg{width:100%;height:auto;display:block;border:4px solid var(--ink);background:var(--white)}
+.knobs{display:grid;gap:14px}
+.knob{border:3px solid var(--ink);padding:10px 12px;background:var(--yellow2)}
+.knob label{font-family:var(--disp);letter-spacing:.05em;font-size:20px;display:flex;justify-content:space-between}
+.knob input{width:100%;accent-color:var(--navy)}
+.score{border:3px solid var(--ink);background:var(--navy);color:var(--white);padding:10px 12px;font-family:var(--disp);letter-spacing:.05em;font-size:22px}
+.score b{color:var(--yellow);font-weight:400;font-size:34px;font-variant-numeric:tabular-nums}
+.score small{display:block;font-family:var(--letter);letter-spacing:0;font-size:15px;color:var(--tint)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button{font-family:var(--disp);letter-spacing:.05em;font-size:17px;border:3px solid var(--ink);background:var(--white);color:var(--ink);padding:5px 12px;box-shadow:3px 3px 0 var(--ink);cursor:pointer}
+button:hover{background:var(--lemon2)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--line);outline-offset:2px}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.cheat{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{border:3px solid var(--ink);padding:12px 14px;background:var(--white);min-width:0}
+.card h3{font-family:var(--disp);font-weight:400;letter-spacing:.05em;font-size:24px;margin:0 0 4px;color:var(--navy)}
+.card p{margin:0}
+.card.big{grid-column:1/-1;background:var(--yellow)}
+.card.warn{background:var(--coral);color:var(--ink)}
+.eq{font-family:var(--disp);letter-spacing:.06em;font-size:clamp(34px,7vw,56px);line-height:1}
+.eq .ln{color:var(--line)}
+.card ul{margin:4px 0 0;padding-left:20px}
+.quiz{display:grid;gap:14px}
+.q{border:3px solid var(--ink);padding:12px 14px;display:grid;gap:8px;background:var(--tint)}
+.q.bonus{background:var(--lemon2)}
+.q h3{font-family:var(--disp);font-weight:400;letter-spacing:.05em;font-size:23px;margin:0}
+.qrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.qrow input{font-family:var(--letter);font-size:18px;width:110px;border:3px solid var(--ink);padding:4px 8px;font-variant-numeric:tabular-nums}
+.fb{font-weight:700;min-height:1.4em}
+.ans{background:var(--white);border:3px dashed var(--ink);padding:8px 12px;font-variant-numeric:tabular-nums}
+.tbc{font-family:var(--disp)}
+.swipe{display:none;text-align:center;color:var(--yellow);font-family:var(--disp);letter-spacing:.06em;font-size:17px;margin-top:-28px}
+@media (max-width:700px){
+  .page{padding:8px;gap:8px;box-shadow:6px 6px 0 var(--ink)}
+  .panel{grid-column:span 6}
+  .s6{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .s6 svg{min-width:560px}
+  .swipe{display:block}
+  .lab,.cheat{grid-template-columns:minmax(0,1fr)}
+  .hpage{padding:14px;box-shadow:6px 6px 0 var(--ink)}
+}
+@media (prefers-reduced-motion:no-preference){
+  .toc a,button{transition:transform .12s,background .12s}
+}
+</style>
+</head>
+<body>
+
+
+<!-- shared SVG patterns -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="dots" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="#0B1026" opacity=".28"/></pattern>
+    <pattern id="dotsW" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="1.7" fill="#FFFFFF" opacity=".22"/></pattern>
+    <pattern id="dotsC" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.5" fill="#FF6B57" opacity=".55"/></pattern>
+    <pattern id="ruled" width="20" height="17" patternUnits="userSpaceOnUse"><rect width="20" height="17" fill="#FFFFFF"/><line x1="0" y1="16.5" x2="20" y2="16.5" stroke="#B9C7F5" stroke-width="1"/></pattern>
+    <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" fill="#FFE98A"/><line x1="0" y1="0" x2="0" y2="10" stroke="#FF6B57" stroke-width="3"/></pattern>
+    <linearGradient id="sunset" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16245E"/><stop offset=".45" stop-color="#FF6B57"/><stop offset="1" stop-color="#FFD23F"/></linearGradient>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#0B1026"/></marker>
+    <marker id="arrC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#FF6B57"/></marker>
+    <marker id="arrW" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#F4F7FF"/></marker>
+    <marker id="arrL" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#FF2E93"/></marker>
+  </defs>
+</svg>
+
+<p style="text-align:center;margin:0 0 -20px"><a href="index.html" style="font-family:var(--disp);letter-spacing:.06em;font-size:18px;color:var(--yellow);text-decoration:none">← ALL COMICS</a></p>
+<main class="book" id="book"></main>
+
+<script>
+/* ============ palette & data ============ */
+const K={ink:'#0B1026',navy:'#16245E',navy2:'#22357F',tint:'#DCE4FF',tint2:'#B9C7F5',yellow:'#FFD23F',yellow2:'#FFE98A',lemon:'#B5E61D',lemon2:'#DDF59A',coral:'#FF6B57',coral2:'#FFC2B8',white:'#FFFFFF',line:'#FF2E93',skin:'#F0CBA8',skin2:'#E8B48A',skin3:'#5E3A22',hair:'#1B1230',chalk:'#F4F7FF',board:'#1C2B66'};
+const D=[[18,10],[22,14],[25,24],[28,23],[31,26],[34,22],[37,23],[40,23],[43,20]];
+const TR=D;
+const GUESS={m:0.5,b:5}, BEST={m:0.95,b:-6.6};
+const TOP='#C27A95';
+const W={6:800,4:533,3:400,2:267};
+let UID=0;
+
+/* ============ text helpers ============ */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const rich=l=>esc(l===''?' ':l).replace(/\*\*(.+?)\*\*/g,'<tspan class="b">$1</tspan>');
+function TX(x,y,s,o={}){
+  const size=o.size||15, lh=o.lh||size*1.24, a=o.anchor||'middle';
+  const lines=String(s).split('|');
+  return `<text x="${x}" y="${y}" font-size="${size}" text-anchor="${a}" class="${o.cls||'lt'}"${o.fill?` fill="${o.fill}"`:''}${o.extra||''}>`+
+    lines.map((l,i)=>`<tspan x="${x}" dy="${i?lh:0}">${rich(l)}</tspan>`).join('')+`</text>`;
+}
+const B=(x,y,s,tx,ty,o={})=>`<g class="bub" data-k="${o.k||'s'}"${tx!=null?` data-tx="${tx}" data-ty="${ty}"`:''}>${TX(x,y,s,{size:o.size||15})}</g>`;
+const CAP=(x,y,s,o={})=>`<g class="cap">${TX(x,y,s,{size:o.size||13,anchor:'start'})}</g>`;
+const NOTE=(x,y,s,o={})=>{const ts=o.ts||16;return `<g class="note">${TX(x,y,o.title||"LINO'S NOTEBOOK",{size:ts,anchor:'start',cls:'nt'})}${TX(x,y+ts*1.35,s,{size:o.size||13,anchor:'start'})}</g>`};
+const SFX=(x,y,s,o={})=>`<text x="${x}" y="${y}" class="disp" font-size="${o.size||30}" text-anchor="middle" fill="${o.fill||K.coral}" stroke="${K.ink}" stroke-width="${o.sw||5}" paint-order="stroke" stroke-linejoin="round" transform="rotate(${o.rot||-8} ${x} ${y})">${esc(s)}</text>`;
+const OUT=(x,y,s,o={})=>`<text x="${x}" y="${y}" class="disp" font-size="${o.size||60}" text-anchor="${o.anchor||'middle'}" fill="${o.fill||K.white}" stroke="${K.ink}" stroke-width="${o.sw||8}" paint-order="stroke" stroke-linejoin="round"${o.rot?` transform="rotate(${o.rot} ${x} ${y})"`:''}${o.fit?` data-fit="${o.fit}"`:''}>${esc(s)}</text>`;
+const fmt=(v,d=1)=>{const r=Math.round(v*Math.pow(10,d))/Math.pow(10,d);if(Math.abs(r)<1e-9)return '0';return (r<0?'−':'+')+Math.abs(r).toFixed(d)};
+const fmtP=(v,d=1)=>{const s=Math.abs(v).toFixed(d);return (v<0?'−':'')+s};
+
+/* ============ scenery ============ */
+const R=(x,y,w,h,f,o='')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}" ${o}/>`;
+const bg=(w,h,c,dots=.5)=>R(0,0,w,h,c)+(dots?R(0,0,w,h,'url(#dots)',`opacity="${dots}"`):'');
+function sun(x,y,r){let s='';for(let i=0;i<12;i++){const a=i*Math.PI/6;s+=`<line x1="${x+Math.cos(a)*(r+6)}" y1="${y+Math.sin(a)*(r+6)}" x2="${x+Math.cos(a)*(r+18)}" y2="${y+Math.sin(a)*(r+18)}" stroke="${K.ink}" stroke-width="7" stroke-linecap="round"/><line x1="${x+Math.cos(a)*(r+6)}" y1="${y+Math.sin(a)*(r+6)}" x2="${x+Math.cos(a)*(r+18)}" y2="${y+Math.sin(a)*(r+18)}" stroke="${K.yellow}" stroke-width="3.5" stroke-linecap="round"/>`}
+  return s+`<circle cx="${x}" cy="${y}" r="${r}" fill="${K.yellow}" stroke="${K.ink}" stroke-width="3.5"/><circle cx="${x+r*.3}" cy="${y+r*.25}" r="${r*.62}" fill="url(#dotsC)" opacity=".55"/>`}
+function cloud(x,y,s=1,f=K.white){return `<g transform="translate(${x},${y}) scale(${s})"><path d="M-50,10 Q-62,-12 -36,-16 Q-30,-40 -4,-32 Q12,-50 32,-30 Q60,-30 54,-4 Q66,12 44,16 L-40,16 Q-56,18 -50,10Z" fill="${f}" stroke="${K.ink}" stroke-width="3"/></g>`}
+function house(x,y,w,h,c,roof){return R(x,y-h,w,h,c,`stroke="${K.ink}" stroke-width="3"`)+`<path d="M${x-8},${y-h} L${x+w/2},${y-h-w*.45} L${x+w+8},${y-h}Z" fill="${roof}" stroke="${K.ink}" stroke-width="3" stroke-linejoin="round"/>`+R(x+w*.22,y-h*.7,w*.22,h*.24,K.yellow2,`stroke="${K.ink}" stroke-width="2"`)+R(x+w*.58,y-h*.45,w*.22,h*.45,K.navy2,`stroke="${K.ink}" stroke-width="2"`)}
+function cup(x,y,s=1,full=true){return `<g transform="translate(${x},${y}) scale(${s})"><path d="M-8,-20 L8,-20 L6,0 L-6,0Z" fill="${K.white}" stroke="${K.ink}" stroke-width="2"/>${full?`<path d="M-7.3,-15 L7.3,-15 L6,0 L-6,0Z" fill="${K.yellow}" stroke="${K.ink}" stroke-width="1.5"/>`:''}</g>`}
+function pitcher(x,y,s=1,full=true,rot=0){return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})"><path d="M-14,-40 L14,-40 L16,0 L-16,0Z" fill="${K.white}" stroke="${K.ink}" stroke-width="2.5"/>${full?`<path d="M-15,-28 L15,-28 L16,0 L-16,0Z" fill="${K.yellow}"/><circle cx="-4" cy="-14" r="4" fill="${K.lemon}" stroke="${K.ink}" stroke-width="1.2"/>`:''}<path d="M14,-34 Q28,-30 16,-12" fill="none" stroke="${K.ink}" stroke-width="4"/><path d="M-16,0 L16,0" stroke="${K.ink}" stroke-width="2.5"/></g>`}
+function stand(x,y,s=1,items=''){
+  let aw='';for(let i=0;i<8;i++)aw+=R(-100+i*25,-182,25,26,i%2?K.white:K.yellow,`stroke="${K.ink}" stroke-width="2"`)+`<circle cx="${-87.5+i*25}" cy="-156" r="12.5" fill="${i%2?K.white:K.yellow}" stroke="${K.ink}" stroke-width="2"/>`;
+  return `<g transform="translate(${x},${y}) scale(${s})">`+R(-88,-158,7,90,K.white,`stroke="${K.ink}" stroke-width="2.5"`)+R(81,-158,7,90,K.white,`stroke="${K.ink}" stroke-width="2.5"`)+aw+R(-100,-182,200,13,K.coral,`stroke="${K.ink}" stroke-width="2.5"`)+
+  R(-96,-76,192,9,K.white,`stroke="${K.ink}" stroke-width="2.5"`)+R(-90,-68,180,68,K.coral,`stroke="${K.ink}" stroke-width="3"`)+R(-90,-68,180,68,'url(#dots)','opacity=".35"')+
+  `<text x="0" y="-26" class="disp" font-size="30" text-anchor="middle" fill="${K.yellow}" stroke="${K.ink}" stroke-width="5" paint-order="stroke">LEMONADE</text><text x="0" y="-8" class="disp" font-size="14" text-anchor="middle" fill="${K.white}">FRESH · COLD · 50¢</text>`+items+`</g>`;
+}
+function person(x,y,s=1,o={}){const c=o.c||K.navy2,sk=o.sk||K.skin2,f=o.flip?-1:1,mood=o.mood||'happy';
+  const mouth=mood==='sad'?'M-5,-70 Q0,-75 5,-70':mood==='wow'?'':'M-6,-73 Q0,-66 6,-73';
+  return `<g transform="translate(${x},${y}) scale(${f*s},${s})"><path d="M-6,-16 L-7,-2 M6,-16 L7,-2" stroke="${K.ink}" stroke-width="7" stroke-linecap="round"/>`+
+  `<path d="M-15,-58 Q0,-64 15,-58 L17,-14 L-17,-14Z" fill="${c}" stroke="${K.ink}" stroke-width="2.5"/>`+(o.reach?`<path d="M14,-52 Q30,-56 38,-62" stroke="${K.ink}" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M14,-52 Q30,-56 38,-62" stroke="${sk}" stroke-width="3.5" stroke-linecap="round" fill="none"/>`:'')+
+  `<circle cx="0" cy="-77" r="14" fill="${sk}" stroke="${K.ink}" stroke-width="2.5"/>${o.hat?`<path d="M-15,-82 Q0,-102 15,-82Z" fill="${o.hat}" stroke="${K.ink}" stroke-width="2"/>`:`<path d="M-14,-80 Q-12,-94 0,-93 Q12,-94 14,-80 Q4,-88 -14,-80Z" fill="${o.hair||K.hair}"/>`}`+
+  `<circle cx="-5" cy="-78" r="2" fill="${K.ink}"/><circle cx="5" cy="-78" r="2" fill="${K.ink}"/>`+(mood==='wow'?`<ellipse cx="0" cy="-70" rx="3" ry="4" fill="${K.ink}"/>`:`<path d="${mouth}" fill="none" stroke="${K.ink}" stroke-width="2"/>`)+`</g>`}
+
+/* ============ characters ============ */
+const ARMS_M={down:['M-21,-80 Q-30,-66 -30,-52','M21,-80 Q30,-66 30,-52'],up:['M-21,-82 Q-34,-98 -38,-118','M21,-82 Q34,-98 38,-118'],
+  point:['M-21,-80 Q-30,-66 -30,-52','M21,-82 Q38,-88 56,-94'],hips:['M-21,-80 Q-42,-70 -24,-56','M21,-80 Q42,-70 24,-56'],
+  hold:['M-21,-80 Q-28,-62 -12,-62','M21,-80 Q28,-62 12,-62'],wave:['M-21,-80 Q-30,-66 -30,-52','M21,-82 Q42,-96 40,-120'],
+  chin:['M-21,-80 Q-30,-66 -30,-52','M21,-80 Q36,-80 12,-98']};
+const end=d=>{const n=d.match(/-?\d+(\.\d+)?/g).map(Number);return [n[n.length-2],n[n.length-1]]};
+function limb(d,c,w=12){return `<path d="${d}" fill="none" stroke="${K.ink}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w-5.5}" stroke-linecap="round" stroke-linejoin="round"/>`}
+function maya(x,y,s=1,o={}){
+  const m=o.mood||'happy', f=o.flip?-1:1, sk=K.skin, ink=K.ink, arms=ARMS_M[o.arms||'down'];
+  let face='';
+  const eyes={
+    happy:`<path d="M-15,-115 q5,-7 10,0 M5,-115 q5,-7 10,0" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`,
+    normal:`<ellipse cx="-10" cy="-117" rx="3.6" ry="5" fill="${ink}"/><ellipse cx="10" cy="-117" rx="3.6" ry="5" fill="${ink}"/>`,
+    shocked:`<circle cx="-10" cy="-118" r="6.5" fill="#fff" stroke="${ink}" stroke-width="2"/><circle cx="10" cy="-118" r="6.5" fill="#fff" stroke="${ink}" stroke-width="2"/><circle cx="-10" cy="-118" r="2.6" fill="${ink}"/><circle cx="10" cy="-118" r="2.6" fill="${ink}"/><path d="M-17,-130 q7,-5 13,-2 M4,-132 q7,-3 13,2" stroke="${ink}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    think:`<ellipse cx="-10" cy="-118" rx="3.6" ry="5" fill="${ink}"/><ellipse cx="10" cy="-118" rx="3.6" ry="5" fill="${ink}"/><circle cx="-9" cy="-120" r="1.4" fill="#fff"/><circle cx="11" cy="-120" r="1.4" fill="#fff"/><path d="M4,-130 q7,-6 13,-1" stroke="${ink}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    sad:`<ellipse cx="-10" cy="-116" rx="3.4" ry="4.5" fill="${ink}"/><ellipse cx="10" cy="-116" rx="3.4" ry="4.5" fill="${ink}"/><path d="M-16,-124 L-5,-127 M5,-127 L16,-124" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`,
+    det:`<ellipse cx="-10" cy="-116" rx="3.6" ry="4.6" fill="${ink}"/><ellipse cx="10" cy="-116" rx="3.6" ry="4.6" fill="${ink}"/><path d="M-17,-128 L-5,-123 M5,-123 L17,-128" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`};
+  const mouths={happy:`<path d="M-10,-105 Q0,-92 10,-105Z" fill="#7A1F2B" stroke="${ink}" stroke-width="2.2" stroke-linejoin="round"/>`,
+    normal:`<path d="M-7,-104 Q0,-98 7,-104" fill="none" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`,
+    shocked:`<ellipse cx="0" cy="-101" rx="5.5" ry="7" fill="#7A1F2B" stroke="${ink}" stroke-width="2.2"/>`,
+    think:`<path d="M-3,-102 L8,-104" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`,
+    sad:`<path d="M-7,-99 Q0,-105 7,-99" fill="none" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`,
+    det:`<path d="M-7,-103 Q1,-100 8,-104" fill="none" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`};
+  const ek={happy:'happy',smile:'normal',shocked:'shocked',think:'think',sad:'sad',det:'det'}[m]||'normal';
+  const mk={happy:'happy',smile:'normal',shocked:'shocked',think:'think',sad:'sad',det:'det'}[m]||'normal';
+  face=eyes[ek]+mouths[mk]+`<circle cx="-15" cy="-107" r="4.5" fill="${K.coral}" opacity=".4"/><circle cx="15" cy="-107" r="4.5" fill="${K.coral}" opacity=".4"/>`;
+  const [h1x,h1y]=end(arms[0]),[h2x,h2y]=end(arms[1]);
+  return `<g transform="translate(${x},${y}) scale(${f*s},${s})">`+
+   `<path d="M0,-150 C-30,-150 -40,-130 -39,-110 C-38,-92 -47,-80 -43,-64 C-39,-52 -49,-44 -41,-33 Q-31,-27 -23,-40 L23,-40 Q31,-27 41,-33 C49,-44 39,-52 43,-64 C47,-80 38,-92 39,-110 C40,-130 30,-150 0,-150Z" fill="${K.hair}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>`+
+   `<path d="M-37,-92 q5,9 0,18 q-4,8 1,16 M37,-92 q-5,9 0,18 q4,8 -1,16" fill="none" stroke="#4A3A66" stroke-width="2" stroke-linecap="round"/>`+
+   limb('M-9,-46 L-10,-6',K.navy)+limb('M9,-46 L10,-6',K.navy)+
+   `<ellipse cx="-12" cy="-3" rx="11" ry="6" fill="${K.white}" stroke="${ink}" stroke-width="2.5"/><ellipse cx="12" cy="-3" rx="11" ry="6" fill="${K.white}" stroke="${ink}" stroke-width="2.5"/><path d="M-19,-3 L-6,-3 M5,-3 L18,-3" stroke="${K.coral}" stroke-width="2"/>`+
+   `<path d="M-22,-52 L22,-52 L20,-36 L-20,-36Z" fill="${K.navy}" stroke="${ink}" stroke-width="2.5" stroke-linejoin="round"/>`+
+   R(-5,-94,10,9,sk,`stroke="${ink}" stroke-width="2"`)+
+   `<path d="M-22,-85 Q0,-91 22,-85 L24,-45 Q0,-41 -24,-45Z" fill="${TOP}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/><path d="M8,-86 Q22,-84 23,-58 L24,-45 Q16,-43 10,-43Z" fill="url(#dots)" opacity=".45"/>`+
+   [[-14,-78],[7,-75],[-4,-64],[13,-60],[-15,-55],[2,-82],[17,-71],[-8,-50],[9,-50]].map(([a,b])=>`<circle cx="${a}" cy="${b}" r="1.4" fill="${K.yellow2}"/>`).join('')+
+   `<circle cx="0" cy="-118" r="28" fill="${sk}" stroke="${ink}" stroke-width="3"/>`+
+   `<path d="M-29,-112 C-33,-153 33,-153 29,-112 C26,-134 12,-143 2,-142 L0,-133 L-2,-142 C-12,-143 -26,-134 -29,-112Z" fill="${K.hair}" stroke="${ink}" stroke-width="2" stroke-linejoin="round"/>`+
+   face+
+   `<path d="M-27,-124 C-36,-100 -25,-88 -29,-70 C-32,-58 -23,-52 -28,-41 Q-20,-43 -17,-50 C-14,-62 -23,-74 -19,-90 C-16,-104 -21,-114 -19,-126Z" fill="${K.hair}" stroke="${ink}" stroke-width="2" stroke-linejoin="round"/>`+
+   `<path d="M27,-124 C36,-100 25,-88 29,-70 C32,-58 23,-52 28,-41 Q20,-43 17,-50 C14,-62 23,-74 19,-90 C16,-104 21,-114 19,-126Z" fill="${K.hair}" stroke="${ink}" stroke-width="2" stroke-linejoin="round"/>`+
+   limb(arms[0],TOP,11)+limb(arms[1],TOP,11)+`<circle cx="${h1x}" cy="${h1y}" r="5.5" fill="${sk}" stroke="${ink}" stroke-width="2.5"/><circle cx="${h2x}" cy="${h2y}" r="5.5" fill="${sk}" stroke="${ink}" stroke-width="2.5"/>`+
+   `</g>`;
+}
+
+const ARMS_L={down:['M-31,-56 Q-44,-44 -42,-30','M31,-56 Q44,-44 42,-30'],up:['M-31,-62 Q-46,-80 -44,-104','M31,-62 Q46,-80 44,-104'],
+  point:['M-31,-56 Q-44,-44 -42,-30','M31,-60 Q50,-66 62,-74'],hold:['M-31,-56 Q-40,-36 -18,-36','M31,-56 Q40,-36 18,-36'],
+  wave:['M-31,-56 Q-44,-44 -42,-30','M31,-62 Q50,-80 46,-104']};
+function lino(x,y,s=1,o={}){
+  const face=o.face||'^_^', f=o.flip?-1:1, ink=K.ink, arms=ARMS_L[o.arms||'down'];
+  let keys='';const kc=[K.tint,K.tint,K.tint,K.coral,K.tint,K.tint,K.tint,K.yellow,K.tint,K.tint,K.tint,K.lemon];
+  for(let r=0;r<3;r++)for(let c=0;c<4;c++){const i=r*4+c,kx=-23+c*12,ky=-58+r*12;keys+=`<rect x="${kx}" y="${ky}" width="10" height="8" rx="2" fill="${kc[i]}" stroke="${ink}" stroke-width="1.5"${i===6?` transform="rotate(18 ${kx+5} ${ky+4})"`:''}/>`}
+  const [h1x,h1y]=end(arms[0]),[h2x,h2y]=end(arms[1]);
+  const faceTxt=`<text x="0" y="-74" class="lcd" font-size="${face.length>3?17:22}" text-anchor="middle" transform="scale(${f},1)">${esc(face)}</text>`;
+  return `<g transform="translate(${x},${y}) scale(${f*s},${s})">`+
+   `<path d="M-14,-14 L-16,-4 M14,-14 L16,-4" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`+
+   R(-28,-7,22,8,K.navy,`rx="4" stroke="${ink}" stroke-width="2"`)+R(6,-7,22,8,K.navy,`rx="4" stroke="${ink}" stroke-width="2"`)+
+   `<path d="${arms[0]}" fill="none" stroke="${ink}" stroke-width="4.5" stroke-linecap="round"/><path d="${arms[1]}" fill="none" stroke="${ink}" stroke-width="4.5" stroke-linecap="round"/>`+
+   `<circle cx="${h1x}" cy="${h1y}" r="5.5" fill="${K.yellow}" stroke="${ink}" stroke-width="2"/><circle cx="${h2x}" cy="${h2y}" r="5.5" fill="${K.yellow}" stroke="${ink}" stroke-width="2"/>`+
+   `<line x1="9" y1="-104" x2="14" y2="-122" stroke="${ink}" stroke-width="3"/><circle cx="14" cy="-126" r="5.5" fill="${K.yellow}" stroke="${ink}" stroke-width="2"/>`+
+   R(-32,-105,64,92,'#EEF2FF',`rx="12" stroke="${ink}" stroke-width="3.5"`)+R(16,-103,14,88,'url(#dots)','rx="8" opacity=".5"')+
+   R(-25,-97,50,31,K.navy,`rx="5" stroke="${ink}" stroke-width="2.5"`)+R(-23,-95,46,8,'#FFFFFF','rx="3" opacity=".12"')+faceTxt+keys+
+   `<g transform="rotate(-30 22 -24)">${R(13,-27,18,7,K.coral2,`rx="2" stroke="${ink}" stroke-width="1.5"`)}<circle cx="20" cy="-23.5" r=".9" fill="${ink}"/><circle cx="24" cy="-23.5" r=".9" fill="${ink}"/></g>`+
+   `</g>`;
+}
+
+/* ============ charts ============ */
+function zig(x,ya,yb){const n=Math.max(4,Math.round(Math.abs(yb-ya)/6));let d=`M${x},${ya}`;for(let i=1;i<n;i++){d+=` L${x+(i%2?5:-5)},${ya+(yb-ya)*i/n}`}return d+` L${x},${yb}`}
+function chart(o){
+  const {x,y,w,h,x0,x1,y0,y1}=o, board=o.theme==='board';
+  const sx=v=>x+(v-x0)/(x1-x0)*w, sy=v=>y+h-(v-y0)/(y1-y0)*h;
+  const fg=board?K.chalk:K.ink, gc=board?'rgba(244,247,255,.16)':'#E3E9FF', id='cl'+(UID++);
+  const pl=o.padL??48,pr=o.padR??20,pt=o.padT??16,pb=o.padB??48;
+  let s='';
+  if(o.frame!==false){const fx=x-pl,fy=y-pt,fw=w+pl+pr,fh=h+pt+pb;
+    s+=board?R(fx-6,fy-6,fw+12,fh+12,K.yellow,`rx="8" stroke="${K.ink}" stroke-width="3"`)+R(fx,fy,fw,fh,K.board,`rx="4" stroke="${K.ink}" stroke-width="2.5"`)+R(fx,fy,fw,fh,'url(#dotsW)','opacity=".35"')
+      :R(fx,fy,fw,fh,K.white,`rx="4" stroke="${K.ink}" stroke-width="2.5"`)}
+  (o.xt||[]).forEach(v=>{s+=`<line x1="${sx(v)}" y1="${y}" x2="${sx(v)}" y2="${y+h}" stroke="${gc}" stroke-width="1.5"/>`+`<text x="${sx(v)}" y="${y+h+16}" font-size="11.5" text-anchor="middle" fill="${fg}">${fmtP(v,0)}</text>`});
+  (o.yt||[]).forEach(v=>{s+=`<line x1="${x}" y1="${sy(v)}" x2="${x+w}" y2="${sy(v)}" stroke="${gc}" stroke-width="1.5"/>`+`<text x="${x-7}" y="${sy(v)+4}" font-size="11.5" text-anchor="end" fill="${fg}">${o.ytf?o.ytf(v):fmtP(v,0)}</text>`});
+  if(o.under)s+=o.under(sx,sy);
+  s+=`<path d="M${x},${y-4} L${x},${y+h} L${x+w+4},${y+h}" fill="none" stroke="${fg}" stroke-width="2.5"/>`;
+  if(y0<0)s+=`<line x1="${x}" y1="${sy(0)}" x2="${x+w}" y2="${sy(0)}" stroke="${fg}" stroke-width="2"/>`;
+  if(o.xl)s+=`<text x="${x+w/2}" y="${y+h+(o.xlo||36)}" font-size="13" font-weight="700" text-anchor="middle" fill="${fg}">${esc(o.xl)}</text>`;
+  if(o.yl)s+=`<text x="${x-(o.ylo||34)}" y="${y+h/2}" font-size="13" font-weight="700" text-anchor="middle" fill="${fg}" transform="rotate(-90 ${x-(o.ylo||34)} ${y+h/2})">${esc(o.yl)}</text>`;
+  s+=`<clipPath id="${id}"><rect x="${x}" y="${y}" width="${w}" height="${h}"/></clipPath><g clip-path="url(#${id})">`;
+  (o.lines||[]).forEach(l=>{s+=`<line x1="${sx(x0)}" y1="${sy(l.m*x0+l.b)}" x2="${sx(x1)}" y2="${sy(l.m*x1+l.b)}" stroke="${l.c||K.line}" stroke-width="${l.w||4.5}" stroke-linecap="round"${l.dash?` stroke-dasharray="${l.dash}"`:''} opacity="${l.op??1}"/>`});
+  (o.curves||[]).forEach(cv=>{let d='';const n=480,lo=y0-(y1-y0)*2,hi=y1+(y1-y0)*2;for(let i=0;i<=n;i++){const xv=x0+(x1-x0)*i/n;const yv=Math.max(lo,Math.min(hi,cv.f(xv)));d+=(i?' L':'M')+sx(xv).toFixed(1)+','+sy(yv).toFixed(1)}
+    s+=`<path d="${d}" fill="none" stroke="${cv.c||K.line}" stroke-width="${cv.w||4.5}" stroke-linecap="round" stroke-linejoin="round"${cv.dash?` stroke-dasharray="${cv.dash}"`:''} opacity="${cv.op??1}"/>`});
+  s+='</g>';
+  const pts=o.pts||D;
+  if(o.resid){const r=o.resid;pts.forEach(([px,py])=>{const yh=r.f?r.f(px):r.m*px+r.b;if(Math.abs(py-yh)>0.05)s+=`<path d="${zig(sx(px),sy(py),sy(yh))}" fill="none" stroke="${K.coral}" stroke-width="2.6" stroke-linejoin="round"/>`;
+    if(r.lab){const v=py-yh;const z=Math.abs(v)<0.05;s+=`<text x="${sx(px)+(z?4:(r.dx||12))}" y="${(sy(py)+sy(yh))/2+(z?-12:5)}" font-size="${r.size||14}" font-weight="700" fill="${board?K.yellow:K.coral}" stroke="${board?K.board:K.white}" stroke-width="3" paint-order="stroke">${fmt(v,r.d??0)}</text>`}})}
+  if(o.hats){const r=o.hats;pts.forEach(([px])=>{const yh=r.f?r.f(px):r.m*px+r.b;s+=`<circle cx="${sx(px)}" cy="${sy(yh)}" r="5.5" fill="${K.white}" stroke="${K.line}" stroke-width="3"/>`;
+    if(r.lab)s+=`<text x="${sx(px)}" y="${sy(yh)-11}" font-size="13" font-weight="700" text-anchor="middle" fill="${K.ink}" stroke="${K.white}" stroke-width="3" paint-order="stroke">${fmtP(yh,r.d??0)}</text>`})}
+  if(o.dots!==false)pts.forEach(([px,py])=>{s+=`<circle cx="${sx(px)}" cy="${sy(py)}" r="${o.r||6.5}" fill="${board?K.yellow:K.navy}" stroke="${board?K.ink:K.white}" stroke-width="2"/>`});
+  if(o.over)s+=o.over(sx,sy);
+  return s;
+}
+function land(f,x0,x1,bottom,fill=K.yellow2){let d=`M${x0},${bottom}`;for(let x=x0;x<=x1;x+=5)d+=` L${x},${f(x).toFixed(1)}`;d+=` L${x1},${bottom}Z`;
+  let e=`M${x0},${f(x0).toFixed(1)}`;for(let x=x0;x<=x1;x+=5)e+=` L${x},${f(x).toFixed(1)}`;
+  return `<path d="${d}" fill="${fill}"/><path d="${d}" fill="url(#dots)" opacity=".4"/><path d="${e}" fill="none" stroke="${K.ink}" stroke-width="4" stroke-linejoin="round"/>`}
+function fit(pts){const n=pts.length,mx=pts.reduce((a,p)=>a+p[0],0)/n,my=pts.reduce((a,p)=>a+p[1],0)/n;let sxy=0,sxx=0;pts.forEach(([x,y])=>{sxy+=(x-mx)*(y-my);sxx+=(x-mx)**2});const m=sxy/sxx;return {m,b:my-m*mx}}
+function mse(pts,m,b){return pts.reduce((a,[x,y])=>a+(y-(m*x+b))**2,0)/pts.length}
+
+/* ============ panel & page builders ============ */
+const P=(span,h,body)=>({span,h,body});
+function recap(span,h,text){const w=W[span];
+  return P(span,h,bg(w,h,K.yellow,.4)+NOTE(22,40,text,{title:'WHAT WE LEARNED',size:span===6?16:14,ts:20})+maya(w-58,h-12,span===6?.85:.8,{mood:'happy',arms:'hips'}))}
+function chTitle(n,title,tag,c,art=''){return {cls:'title',panels:[P(6,250,bg(800,250,c,.45)+art+
+  `<text x="40" y="72" class="disp" font-size="30" fill="${K.ink}" letter-spacing="3">CHAPTER ${n}</text>`+OUT(40,150,title,{anchor:'start',size:62,fit:510})+TX(42,198,tag,{anchor:'start',size:19}))],id:'ch'+n}}
+
+/* ============ ISSUE #3 data (verified in numpy) ============ */
+const LR={"tr": [[3, 0], [4, 0], [7, 0], [12, 0], [13, 0], [16, 1], [20, 1], [23, 0], [24, 1], [25, 1], [27, 0], [32, 1], [36, 1], [37, 1], [39, 1], [40, 1]], "te": [[9, 0], [15, 0], [19, 1], [26, 1], [31, 1], [42, 1]], "lin": [0.029379819702400344, -0.09487346584120766], "two": {"pts": [[34.4, 23.0, 1], [34.5, 30.0, 1], [23.1, 18.7, 0], [14.1, 20.4, 0], [5.1, 30.0, 0], [18.0, 24.1, 0], [18.9, 24.1, 1], [4.8, 18.7, 0], [4.9, 14.3, 0], [42.0, 32.7, 1], [28.4, 15.7, 0], [12.1, 30.9, 0], [20.0, 21.4, 0], [41.0, 33.0, 1], [38.0, 22.0, 1], [35.9, 32.7, 1], [18.3, 25.1, 0], [22.2, 18.8, 1], [29.4, 28.8, 1], [5.4, 27.5, 0], [24.7, 27.7, 1], [13.6, 23.3, 0], [37.3, 18.4, 1], [5.5, 26.8, 0], [29.5, 16.1, 1], [36.9, 27.8, 1], [11.9, 26.7, 0], [37.9, 21.5, 1], [37.0, 30.0, 1], [3.7, 17.9, 0], [30.6, 21.8, 1], [3.0, 30.0, 0], [22.6, 21.6, 1], [20.0, 28.3, 1], [10.9, 26.3, 0], [15.7, 32.8, 0], [34.4, 33.8, 1], [15.3, 28.5, 1], [8.8, 30.2, 0], [30.2, 17.1, 0]], "w": [0.35307683961037817, 0.290212179908136, -14.47372404567915]}};
+const SG=z=>1/(1+Math.exp(-z));
+const RTR=LR.tr, RTE=LR.te;
+const PB=x=>SG(0.2*x-4), PG=x=>SG(0.05*x);
+const pct=(p,d=0)=>(p*100).toFixed(d)+'%';
+const AXP={x0:0,x1:45,y0:-0.12,y1:1.12,xt:[0,10,20,30,40],yt:[0,0.5,1],ytf:v=>v===0.5?'50%':v===1?'100%':'0%',xl:'Minutes run so far',yl:'Chance of stopping',padL:60,ylo:46};
+const rdots=(pts,r=6.5)=>(sx,sy)=>pts.map(([a,b])=>b?`<circle cx="${sx(a)}" cy="${sy(1)}" r="${r}" fill="${K.navy}" stroke="${K.white}" stroke-width="2"/>`:`<circle cx="${sx(a)}" cy="${sy(0)}" r="${r}" fill="${K.white}" stroke="${K.navy}" stroke-width="3"/>`).join('');
+const legend=(x,y,items)=>`<g transform="translate(${x},${y})">${R(0,0,items.w||170,items.length*21+10,K.white,`stroke="${K.ink}" stroke-width="2"`)}`+items.map((it,i)=>{const yy=17+i*21;
+  const mk=it.k==='dot'?`<circle cx="16" cy="${yy-4}" r="5.5" fill="${K.navy}"/>`:it.k==='dia'?`<path d="M16,${yy-11} L23,${yy-4} L16,${yy+3} L9,${yy-4}Z" fill="${K.coral}" stroke="${K.ink}" stroke-width="1.5"/>`:`<line x1="6" y1="${yy-4}" x2="26" y2="${yy-4}" stroke="${it.c}" stroke-width="4"${it.dash?` stroke-dasharray="${it.dash}"`:''}/>`;
+  return mk+`<text x="34" y="${yy}" font-size="12.5">${esc(it.t)}</text>`}).join('')+`</g>`;
+function recapX(span,h,text,o={}){const w=W[span];return P(span,h,bg(w,h,o.c||K.yellow,.4)+NOTE(22,40,text,{title:'WHAT WE LEARNED',size:span===6?16:14,ts:20})+(o.extra||'')+maya(w-58,h-12,span===6?.85:.8,{mood:o.mood||'happy',arms:o.arms||'hips'}))}
+function spark(x,y,r,c=K.yellow){let d='';for(let i=0;i<16;i++){const a=i*Math.PI/8,rr=i%2?r*.38:r;d+=(i?' L':'M')+(x+Math.cos(a)*rr).toFixed(1)+','+(y+Math.sin(a)*rr).toFixed(1)}return `<path d="${d}Z" fill="${c}" stroke="${K.ink}" stroke-width="2" stroke-linejoin="round"/>`}
+function knob(x,y,r,val,label){const a=(-225+val/8*270)*Math.PI/180;let t='';for(let i=0;i<=8;i++){const b=(-225+i/8*270)*Math.PI/180;t+=`<line x1="${x+Math.cos(b)*(r+4)}" y1="${y+Math.sin(b)*(r+4)}" x2="${x+Math.cos(b)*(r+10)}" y2="${y+Math.sin(b)*(r+10)}" stroke="${K.ink}" stroke-width="2.5"/>`}
+  return t+`<circle cx="${x}" cy="${y}" r="${r}" fill="${K.yellow}" stroke="${K.ink}" stroke-width="3"/><circle cx="${x}" cy="${y}" r="${r}" fill="url(#dots)" opacity=".35"/><line x1="${x}" y1="${y}" x2="${x+Math.cos(a)*r*.82}" y2="${y+Math.sin(a)*r*.82}" stroke="${K.ink}" stroke-width="5" stroke-linecap="round"/>`+(label?`<text x="${x}" y="${y+r+26}" class="disp" font-size="${Math.max(13,r*.6)}" text-anchor="middle">${esc(label)}</text>`:'')}
+function therm(x,y,s,lv){return `<g transform="translate(${x},${y}) scale(${s})"><rect x="-10" y="-120" width="20" height="110" rx="10" fill="${K.white}" stroke="${K.ink}" stroke-width="3.5"/><circle cy="-6" r="18" fill="${K.coral}" stroke="${K.ink}" stroke-width="3.5"/><rect x="-5" y="${-14-lv}" width="10" height="${lv}" fill="${K.coral}"/>${[0,1,2,3,4].map(i=>`<line x1="10" y1="${-105+i*18}" x2="18" y2="${-105+i*18}" stroke="${K.ink}" stroke-width="2.5"/>`).join('')}</g>`}
+function crow(x,y,s,f=1){return `<g transform="translate(${x},${y}) scale(${f*s},${s})"><path d="M-40,-6 L-70,-20 L-62,-2 L-74,6 L-40,8Z" fill="${K.hair}" stroke="${K.ink}" stroke-width="2.5" stroke-linejoin="round"/><ellipse cx="-6" cy="-6" rx="40" ry="26" fill="${K.hair}" stroke="${K.ink}" stroke-width="3"/><path d="M-20,-16 Q0,-2 18,-14" fill="none" stroke="#4A3A66" stroke-width="3"/><circle cx="30" cy="-34" r="20" fill="${K.hair}" stroke="${K.ink}" stroke-width="3"/><path d="M46,-40 L72,-32 L46,-26Z" fill="${K.yellow}" stroke="${K.ink}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="36" cy="-40" r="7" fill="${K.white}" stroke="${K.ink}" stroke-width="2"/><circle cx="38" cy="-39" r="3" fill="${K.ink}"/><path d="M26,-50 L44,-46" stroke="${K.ink}" stroke-width="3" stroke-linecap="round"/><path d="M-8,18 L-10,34 M8,18 L10,34 M-16,34 L-4,34 M2,34 L16,34" stroke="${K.yellow}" stroke-width="3.5" stroke-linecap="round"/></g>`}
+function drops(x,y,n=6){let s='';for(let i=0;i<n;i++){const a=-Math.PI/2+(i-(n-1)/2)*.5;s+=`<path d="M${x+Math.cos(a)*30},${y+Math.sin(a)*30} q-4,7 0,10 q4,-3 0,-10Z" fill="${K.yellow}" stroke="${K.ink}" stroke-width="1.5"/>`}return s}
+
+
+function tree(x,y,s,c){return `<g transform="translate(${x},${y}) scale(${s})">${R(-7,-60,14,60,'#8A5A3B',`stroke="${K.ink}" stroke-width="2.5"`)}<circle cx="-20" cy="-70" r="26" fill="${c}" stroke="${K.ink}" stroke-width="3"/><circle cx="18" cy="-74" r="28" fill="${c}" stroke="${K.ink}" stroke-width="3"/><circle cx="0" cy="-100" r="28" fill="${c}" stroke="${K.ink}" stroke-width="3"/><circle cx="6" cy="-84" r="30" fill="url(#dots)" opacity=".3"/></g>`}
+function runner(x,y,s,o={}){const c=o.c||K.coral,sk=o.sk||K.skin2,f=o.flip?-1:1,ink=K.ink;
+  return `<g transform="translate(${x},${y}) scale(${f*s},${s})">`+
+   limb('M-2,-40 L-16,-22 L-30,-10',sk,9)+limb('M2,-40 L16,-22 L12,-2',sk,9)+
+   `<ellipse cx="-33" cy="-8" rx="8" ry="4.5" fill="${K.white}" stroke="${ink}" stroke-width="2" transform="rotate(30 -33 -8)"/><ellipse cx="16" cy="-1" rx="9" ry="4.5" fill="${K.white}" stroke="${ink}" stroke-width="2"/>`+
+   limb('M-6,-74 L-22,-62 L-14,-48',sk,8)+
+   `<path d="M-14,-46 L12,-46 L14,-34 L-14,-34Z" fill="${K.navy}" stroke="${ink}" stroke-width="2"/>`+
+   `<path d="M-10,-84 L14,-86 L14,-44 L-12,-44Z" fill="${c}" stroke="${ink}" stroke-width="2.5" stroke-linejoin="round"/>`+
+   R(-6,-74,15,12,K.white,`stroke="${ink}" stroke-width="1.5"`)+`<text x="1.5" y="-64.5" font-size="8" font-weight="700" text-anchor="middle">${o.num||7}</text>`+
+   limb('M8,-78 L22,-68 L30,-82',sk,8)+(o.bottle?`<rect x="26" y="-100" width="10" height="20" rx="3" fill="${K.tint}" stroke="${ink}" stroke-width="2"/>`:'')+
+   `<circle cx="6" cy="-100" r="13" fill="${sk}" stroke="${ink}" stroke-width="2.5"/><path d="M-7,-103 Q-4,-116 6,-115 Q17,-116 19,-104 Q10,-110 -7,-103Z" fill="${o.hair||K.hair}"/>`+
+   `<circle cx="9" cy="-101" r="1.8" fill="${ink}"/><circle cx="15" cy="-101" r="1.8" fill="${ink}"/>`+(o.happy?`<path d="M8,-94 Q12,-90 16,-94" fill="none" stroke="${ink}" stroke-width="1.8"/>`:`<ellipse cx="13" cy="-93" rx="2.4" ry="3" fill="#7A1F2B" stroke="${ink}" stroke-width="1.2"/>`)+
+   (o.sweat!==false?`<path d="M-6,-112 q-4,7 0,10 q4,-3 0,-10Z" fill="${K.tint}" stroke="${ink}" stroke-width="1.2"/>`:'')+`</g>`}
+function stopwatch(x,y,s){return `<g transform="translate(${x},${y}) scale(${s})"><rect x="-5" y="-34" width="10" height="8" fill="${K.coral}" stroke="${K.ink}" stroke-width="2"/><circle r="24" fill="${K.white}" stroke="${K.ink}" stroke-width="3.5"/><line x1="0" y1="0" x2="10" y2="-14" stroke="${K.coral}" stroke-width="3" stroke-linecap="round"/><circle r="3" fill="${K.ink}"/>${[0,1,2,3].map(i=>`<line x1="${18*Math.cos(i*Math.PI/2)}" y1="${18*Math.sin(i*Math.PI/2)}" x2="${22*Math.cos(i*Math.PI/2)}" y2="${22*Math.sin(i*Math.PI/2)}" stroke="${K.ink}" stroke-width="2"/>`).join('')}</g>`}
+function squisher(x,y,s){return `<g transform="translate(${x},${y}) scale(${s})">`+
+  `<path d="M-70,-150 L70,-150 L30,-110 L-30,-110Z" fill="${K.tint}" stroke="${K.ink}" stroke-width="3.5" stroke-linejoin="round"/>`+
+  R(-80,-110,160,110,K.navy2,`rx="10" stroke="${K.ink}" stroke-width="3.5"`)+R(-80,-110,160,110,'url(#dotsW)','rx="10" opacity=".4"')+
+  `<text x="0" y="-84" class="disp" font-size="17" text-anchor="middle" fill="${K.yellow}" letter-spacing="1" data-fit="140">SQUISH-O-MATIC</text>`+
+  R(-56,-74,112,56,K.white,`rx="4" stroke="${K.ink}" stroke-width="2"`)+
+  `<path d="M-50,-24 C-6,-24 6,-68 50,-68" fill="none" stroke="${K.line}" stroke-width="5" stroke-linecap="round"/>`+
+  R(70,-36,46,26,K.yellow,`stroke="${K.ink}" stroke-width="3"`)+`<text x="93" y="-18" class="disp" font-size="14" text-anchor="middle">0–1</text>`+
+  `<circle cx="-56" cy="-14" r="6" fill="${K.lemon}" stroke="${K.ink}" stroke-width="2"/><circle cx="-38" cy="-14" r="6" fill="${K.coral}" stroke="${K.ink}" stroke-width="2"/></g>`}
+
+const pages=[];
+
+/* ---------- COVER ---------- */
+(function(){
+  let rays='';for(let i=0;i<20;i++){const a1=i*Math.PI/10,a2=a1+Math.PI/20;rays+=`<path d="M400,360 L${400+900*Math.cos(a1)},${360+900*Math.sin(a1)} L${400+900*Math.cos(a2)},${360+900*Math.sin(a2)}Z" fill="${K.navy2}"/>`}
+  const yy=x=>480-200*SG((x-400)/60);let d='';for(let x=20;x<=790;x+=5)d+=(x===20?'M':' L')+x+','+yy(x).toFixed(1);
+  const dts=[[70,0],[150,0],[230,0],[330,0],[300,1],[440,0],[480,1],[560,1],[650,1],[730,1]];
+  const body=R(0,0,800,580,K.navy)+rays+R(0,0,800,580,'url(#dotsW)','opacity=".5"')+
+   `<line x1="20" y1="280" x2="790" y2="280" stroke="${K.white}" stroke-width="2" stroke-dasharray="6 8" opacity=".5"/><line x1="20" y1="480" x2="790" y2="480" stroke="${K.white}" stroke-width="2" stroke-dasharray="6 8" opacity=".5"/>`+
+   `<text x="784" y="272" class="disp" font-size="22" text-anchor="end" fill="${K.lemon}">YES</text><text x="784" y="510" class="disp" font-size="22" text-anchor="end" fill="${K.coral2}">NO</text>`+
+   `<path d="${d}" fill="none" stroke="${K.ink}" stroke-width="16" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${K.line}" stroke-width="9" stroke-linecap="round"/>`+
+   dts.map(([x,v])=>`<circle cx="${x}" cy="${v?280:480}" r="11" fill="${v?K.yellow:K.white}" stroke="${K.ink}" stroke-width="3"/>`).join('')+
+   OUT(400,92,'THE YES-OR-NO',{size:66,fill:K.yellow,sw:10,fit:620})+OUT(400,170,'MACHINE',{size:92,fill:K.yellow,sw:11,fit:740})+
+   `<text x="400" y="208" class="disp" font-size="22" text-anchor="middle" fill="${K.white}" letter-spacing="2" data-fit="600">A LOGISTIC REGRESSION ADVENTURE</text>`+
+   `<g transform="translate(-6,262) rotate(-10 92 70)">${R(30,38,124,64,K.coral,`stroke="${K.ink}" stroke-width="3"`)}<text x="92" y="66" class="disp" font-size="22" text-anchor="middle" fill="${K.white}">ISSUE #3</text><text x="92" y="90" class="disp" font-size="17" text-anchor="middle" fill="${K.ink}" data-fit="112">50% CHANCE OF FUN</text></g>`+
+   R(0,540,800,40,K.lemon,`stroke="${K.ink}" stroke-width="3"`)+R(0,540,800,40,'url(#dots)','opacity=".4"')+
+   maya(250,545,1.75,{mood:'happy',arms:'point'})+lino(565,545,1.6,{face:'Y/N',arms:'up'})+runner(710,540,1.3,{c:K.coral,num:42})+
+   `<text x="400" y="570" class="disp" font-size="20" text-anchor="middle" fill="${K.ink}" letter-spacing="2" data-fit="760">STARRING XIRI &amp; LINO · TEACHING A MACHINE TO SAY YES OR NO</text>`;
+  pages.push({cls:'cover',panels:[P(6,580,body)],id:'cover'});
+})();
+
+/* ---------- CHAPTER 1 ---------- */
+pages.push(chTitle(1,'WILL THEY STOP?','In which 300 runners are coming|and nobody wears a THIRSTY sign.',K.yellow,
+  `<g transform="translate(655,125) rotate(5)">${R(-90,-70,180,140,K.white,`stroke="${K.ink}" stroke-width="4"`)}<text x="0" y="-38" class="disp" font-size="20" text-anchor="middle" fill="${K.coral}">FALL FUN RUN</text><text x="0" y="40" class="disp" font-size="72" text-anchor="middle" fill="${K.navy}">42</text><circle cx="-72" cy="-52" r="6" fill="${K.tint}" stroke="${K.ink}" stroke-width="2"/><circle cx="72" cy="-52" r="6" fill="${K.tint}" stroke="${K.ink}" stroke-width="2"/></g>`));
+
+pages.push({panels:[
+  P(6,330, bg(800,330,K.tint,.25)+cloud(380,50,.8)+
+    tree(60,250,1,K.coral)+tree(410,236,.75,K.yellow)+
+    R(0,236,800,94,K.lemon,`stroke="${K.ink}" stroke-width="3"`)+R(0,236,800,94,'url(#dots)','opacity=".3"')+
+    `<path d="M0,282 L800,262 L800,310 L0,330Z" fill="${K.coral2}" stroke="${K.ink}" stroke-width="3"/>`+
+    `<g transform="rotate(-3 590 130)">${R(520,70,140,110,K.yellow,`stroke="${K.ink}" stroke-width="3"`)}<text x="590" y="104" class="disp" font-size="22" text-anchor="middle" fill="${K.coral}" data-fit="124">FALL FUN RUN</text><text x="590" y="132" class="disp" font-size="17" text-anchor="middle" fill="${K.navy}">SATURDAY</text><text x="590" y="158" class="disp" font-size="17" text-anchor="middle" fill="${K.navy}" data-fit="124">300 RUNNERS</text></g><line x1="590" y1="180" x2="590" y2="262" stroke="${K.ink}" stroke-width="5"/>`+
+    maya(196,268,.9,{mood:'det',arms:'hold'})+stand(190,270,.85,cup(-30,-76,1)+cup(-6,-76,1)+cup(18,-76,1)+pitcher(54,-76,1))+
+    runner(690,318,.85,{c:K.navy2,num:12,flip:true})+runner(770,312,.9,{c:K.coral,num:88,flip:true,hair:'#7A3E12'})+
+    lino(330,272,.7,{face:'o_o'})+
+    CAP(14,28,'October. The Fall Fun Run goes right past Xiri\'s stand.',{size:15})+
+    B(180,94,'300 runners! If I pour cups|BEFORE they arrive, I\'ll be|super fast.',190,150,{size:15})+
+    B(400,92,'But pour for WHO? Nobody|wears a THIRSTY sign.',344,196,{size:15})),
+  P(3,330, bg(400,330,K.yellow2,.35)+CAP(12,24,'A practice run, one week before.',{size:14})+
+    `<path d="M0,250 L400,236 L400,280 L0,296Z" fill="${K.coral2}" stroke="${K.ink}" stroke-width="3"/>`+
+    runner(150,282,.9,{c:K.lemon,num:5,flip:true,sk:K.skin3})+
+    lino(316,318,.8,{face:'^_^',arms:'hold'})+stopwatch(316,250,.7)+
+    B(130,80,'How long have you|been running?',150,170,{size:14})+
+    B(296,130,'Lino times every|runner. 16 so far!',316,214,{size:14})),
+  P(3,330, bg(400,330,K.lemon2,.4)+
+    `<g transform="rotate(-1.5 200 170)">${R(26,20,348,296,'url(#ruled)',`stroke="${K.ink}" stroke-width="3"`)}<line x1="46" y1="20" x2="46" y2="316" stroke="${K.coral}" stroke-width="2"/>`+
+    `<text x="210" y="48" class="disp" font-size="19" text-anchor="middle" fill="${K.navy}">LINO'S RUNNER LOG</text>`+
+    [0,1].map(c=>{const ox=60+c*160;return `<text x="${ox+36}" y="74" font-size="12.5" font-weight="700" text-anchor="middle">Minutes</text><text x="${ox+104}" y="74" font-size="12.5" font-weight="700" text-anchor="middle">Stopped?</text><line x1="${ox}" y1="80" x2="${ox+146}" y2="80" stroke="${K.ink}" stroke-width="2"/>`+
+      RTR.slice(c*8,c*8+8).map(([m,v],i)=>`<text x="${ox+36}" y="${102+i*25}" font-size="16" text-anchor="middle">${m}</text><text x="${ox+104}" y="${102+i*25}" font-size="16" text-anchor="middle" font-weight="700" fill="${v?K.navy:K.coral}">${v?'yes':'no'}</text>`).join('')}).join('')+`</g>`)
+]});
+
+pages.push({panels:[
+  P(3,320, bg(400,320,K.white,.15)+NOTE(22,38,'Last time we predicted a NUMBER|(cups). That\'s **regression**.|Now the answer is a group: yes|or no. That\'s **classification**.',{size:14})+
+    lino(320,306,.8,{face:'?_?'})+
+    B(150,226,'So it\'s a yes-or-no|question machine!',300,240,{size:14})),
+  P(3,320, bg(400,320,K.white,.15)+
+    `<g transform="translate(110,250)">${R(-56,-70,112,80,K.lemon2,`stroke="${K.ink}" stroke-width="3"`)}<text x="0" y="-24" class="disp" font-size="26" text-anchor="middle">YES = 1</text><text x="0" y="-2" font-size="12" text-anchor="middle">stopped</text></g>`+
+    `<g transform="translate(250,250)">${R(-56,-70,112,80,K.coral2,`stroke="${K.ink}" stroke-width="3"`)}<text x="0" y="-24" class="disp" font-size="26" text-anchor="middle">NO = 0</text><text x="0" y="-2" font-size="12" text-anchor="middle">kept running</text></g>`+
+    maya(350,306,.75,{mood:'smile',arms:'point',flip:true})+
+    B(170,44,'Computers like numbers,|so yes = 1 and no = 0.',340,190,{size:15})),
+  P(6,350, bg(800,350,K.tint,.2)+
+    chart({...AXP,x:80,y:40,w:430,h:250,pts:[],dots:false,yl:'Stopped? (1 = yes)',
+      under:(sx,sy)=>R(sx(13),sy(1.12),sx(27)-sx(13),sy(-0.12)-sy(1.12),K.yellow2,'opacity=".8"')+`<text x="${sx(20)}" y="${sy(0.5)+5}" class="disp" font-size="18" text-anchor="middle" fill="${K.ink}">MIXED UP</text>`,
+      over:rdots(RTR)})+
+    maya(632,340,1.1,{mood:'think',arms:'chin'})+lino(748,340,.75,{face:'o_O'})+
+    B(690,40,'Two rows of dots!|Stoppers on top,|runners-by on the bottom.',748,232,{size:15})+
+    B(626,140,'And in the middle,|it\'s a mix.',632,172,{size:15})),
+  recapX(6,210,'• Yes/no questions are **classification**. Number questions are **regression**.|• We turn yes into 1 and no into 0.|• Runners who ran longer stop more often, but the middle is mixed.')
+]});
+
+/* ---------- CHAPTER 2 ---------- */
+pages.push(chTitle(2,'WHEN LINES BREAK','In which a straight line predicts a 123% chance.',K.coral,
+  `<g transform="translate(560,30)">${R(0,0,210,180,K.white,`stroke="${K.ink}" stroke-width="4"`)}<line x1="0" y1="160" x2="210" y2="10" stroke="${K.line}" stroke-width="8"/><line x1="0" y1="40" x2="210" y2="40" stroke="${K.ink}" stroke-width="2" stroke-dasharray="6 6"/>${OUT(150,30,'123%?!',{size:30,fill:K.coral,sw:5})}</g>`));
+
+pages.push({panels:[
+  P(6,350, bg(800,350,K.tint,.2)+
+    chart({...AXP,y0:-0.3,y1:1.45,x:80,y:36,w:430,h:256,pts:[],dots:false,yl:'Chance of stopping',lines:[{m:LR.lin[0],b:LR.lin[1]}],
+      under:(sx,sy)=>`<line x1="${sx(0)}" y1="${sy(1)}" x2="${sx(45)}" y2="${sy(1)}" stroke="${K.ink}" stroke-width="1.5" stroke-dasharray="5 5"/>`,
+      over:(sx,sy)=>rdots(RTR)(sx,sy)+`<circle cx="${sx(45)}" cy="${sy(1.227)}" r="7" fill="${K.coral}" stroke="${K.ink}" stroke-width="2.5"/><text x="${sx(45)-12}" y="${sy(1.227)-12}" font-size="15" font-weight="700" text-anchor="end" fill="${K.ink}" stroke="${K.white}" stroke-width="3" paint-order="stroke">45 min → 123%?!</text>`+
+        `<circle cx="${sx(0)}" cy="${sy(-0.095)}" r="7" fill="${K.coral}" stroke="${K.ink}" stroke-width="2.5"/><text x="${sx(0)+12}" y="${sy(-0.095)+24}" font-size="15" font-weight="700" fill="${K.ink}" stroke="${K.white}" stroke-width="3" paint-order="stroke">0 min → −9%?!</text>`})+
+    maya(632,340,1.1,{mood:'shocked',arms:'up'})+lino(748,340,.75,{face:'^_^',arms:'point',flip:true})+
+    B(686,40,'My favorite tool:|a straight line!',748,232,{size:15})+
+    B(626,124,'A 123% chance?!|And −9% at the start?',632,170,{size:15})),
+  P(3,320, bg(400,320,K.white,.15)+
+    lino(100,306,.85,{face:'@_@'})+`<g transform="translate(270,240)">${runner(0,60,.8,{c:K.lemon,num:3})}${runner(40,60,.8,{c:K.lemon,num:3,happy:true})}</g>`+
+    SFX(270,150,'×1.23?',{size:26,fill:K.yellow,rot:-6})+
+    B(150,44,'Can one runner stop|1.23 times?!',100,190,{size:15})),
+  P(3,320, bg(400,320,K.white,.15)+NOTE(22,38,'A **probability** is a chance from|0 (never) to 1 (for sure).|0.73 means 73%. It can never|go below 0 or above 1.',{size:14})+
+    maya(330,306,.8,{mood:'det',arms:'hips'})+
+    B(170,236,'A straight line runs|off forever. We need|something that stops!',318,226,{size:14}))
+]});
+
+pages.push({panels:[
+  P(6,330, bg(800,330,K.yellow2,.35)+
+    squisher(400,300,1.35)+
+    `<g transform="translate(110,120)">${['−50','0','3','999'].map((t,i)=>`<g transform="translate(${(i%2)*70},${Math.floor(i/2)*60}) rotate(${i*7-10})">${R(-28,-20,56,36,K.white,`stroke="${K.ink}" stroke-width="2.5"`)}<text x="0" y="5" class="disp" font-size="20" text-anchor="middle">${t}</text></g>`).join('')}</g>`+
+    `<path d="M210,150 Q270,120 300,92" fill="none" stroke="${K.ink}" stroke-width="3" marker-end="url(#arr)"/>`+
+    `<g transform="translate(600,220)">${[['0.00…'],['0.50'],['0.95'],['0.99…']].map(([t],i)=>`<g transform="translate(${(i%2)*92},${Math.floor(i/2)*56})">${R(-38,-20,76,36,K.lemon2,`stroke="${K.ink}" stroke-width="2.5"`)}<text x="0" y="5" class="disp" font-size="20" text-anchor="middle">${t}</text></g>`).join('')}</g>`+
+    lino(110,320,.8,{face:'>o<',arms:'up'})+
+    SFX(560,110,'SQUISH!',{size:36,fill:K.lemon,rot:-8})+
+    CAP(14,28,'Lino builds a new gadget.',{size:15})+
+    B(650,48,'Any number goes in…|a chance from 0 to 1|comes out!',600,180,{size:15})),
+  P(3,340, bg(400,340,K.white,.15)+CAP(12,24,'The S-curve (the squisher)',{size:14})+
+    chart({x0:-6,x1:6,y0:-0.05,y1:1.05,xt:[-6,-4,-2,0,2,4,6],yt:[0,0.5,1],ytf:v=>v===0.5?'50%':v===1?'100%':'0%',x:70,y:56,w:300,h:210,padL:56,padB:44,padT:12,padR:16,xl:'Score going in (any number)',yl:'Chance out',ylo:46,pts:[],dots:false,curves:[{f:SG}],
+      over:(sx,sy)=>[[-4,'2%'],[-2,'12%'],[0,'50%'],[2,'88%'],[4,'98%']].map(([z,l])=>`<circle cx="${sx(z)}" cy="${sy(SG(z))}" r="5.5" fill="${K.yellow}" stroke="${K.ink}" stroke-width="2"/><text x="${sx(z)+(z>0?-8:8)}" y="${sy(SG(z))+(z>0?18:-10)}" font-size="12.5" font-weight="700" text-anchor="${z>0?'end':'start'}">${l}</text>`).join('')})),
+  P(3,340, bg(400,340,K.white,.15)+NOTE(22,38,'The squisher is called the **sigmoid**.|Big negative → near 0.|Zero → exactly 0.5.|Big positive → near 1.|Math: p = 1 ÷ (1 + e^(−z))',{size:14})+
+    lino(320,330,.8,{face:'o_o'})+
+    B(150,262,'It gets close to 0 and 1|but never touches them!',300,272,{size:14})),
+  recapX(6,210,'• A straight line can give silly chances like 123% or −9%.|• A **probability** must stay between 0 and 1.|• The **sigmoid** (S-curve) squishes any number into 0 to 1.')
+]});
+
+/* ---------- CHAPTER 3 ---------- */
+pages.push(chTitle(3,'SCORE, THEN SQUISH','In which our old friend the line comes back as step one.',K.lemon,
+  `<g transform="translate(560,40)">${R(0,0,90,70,K.white,`stroke="${K.ink}" stroke-width="4"`)}<line x1="10" y1="60" x2="80" y2="10" stroke="${K.line}" stroke-width="6"/><path d="M98,35 L122,35" stroke="${K.ink}" stroke-width="4" marker-end="url(#arr)"/>${R(130,0,90,70,K.white,`stroke="${K.ink}" stroke-width="4"`)}<path d="M138,60 C170,60 170,10 212,10" fill="none" stroke="${K.line}" stroke-width="6"/><text x="45" y="100" class="disp" font-size="20" text-anchor="middle">SCORE</text><text x="175" y="100" class="disp" font-size="20" text-anchor="middle">SQUISH</text></g>`));
+
+pages.push({panels:[
+  P(6,300, bg(800,300,K.tint,.2)+
+    (()=>{const box=(x,t1,t2,c)=>R(x,70,170,96,c,`rx="10" stroke="${K.ink}" stroke-width="3.5"`)+`<text x="${x+85}" y="104" class="disp" font-size="20" text-anchor="middle" letter-spacing="1">${t1}</text><text x="${x+85}" y="138" font-size="17" font-weight="700" text-anchor="middle">${t2}</text>`;
+      return `<text x="40" y="126" class="disp" font-size="22" text-anchor="middle">x</text><text x="40" y="150" font-size="12" text-anchor="middle">minutes</text>`+
+        `<path d="M62,118 L96,118" stroke="${K.ink}" stroke-width="3.5" marker-end="url(#arr)"/>`+box(100,'1 · SCORE','z = m·x + b',K.yellow)+
+        `<path d="M272,118 L320,118" stroke="${K.ink}" stroke-width="3.5" marker-end="url(#arr)"/><text x="296" y="108" class="disp" font-size="18" text-anchor="middle">z</text>`+box(322,'2 · SQUISH','p = sigmoid(z)',K.lemon2)+
+        `<path d="M494,118 L542,118" stroke="${K.ink}" stroke-width="3.5" marker-end="url(#arr)"/><text x="518" y="108" class="disp" font-size="18" text-anchor="middle">p</text>`+box(544,'3 · DECIDE','p ≥ 50%? POUR!',K.coral2)})()+
+    maya(110,292,.75,{mood:'happy',arms:'point'})+lino(690,292,.7,{face:'^_^',flip:true})+
+    B(380,220,'Step 1 is our old friend from Issue #1: the line!',190,250,{size:16})+
+    CAP(14,28,'How logistic regression works:',{size:15})),
+  P(3,340, bg(400,340,K.tint,.2)+R(16,16,368,308,K.yellow,`rx="8" stroke="${K.ink}" stroke-width="3"`)+R(22,22,356,296,K.board,`rx="4" stroke="${K.ink}" stroke-width="2"`)+R(22,22,356,296,'url(#dotsW)','opacity=".35"')+
+    `<text x="200" y="58" class="disp" font-size="22" text-anchor="middle" fill="${K.yellow}">RUNNER AT 25 MINUTES</text>`+
+    `<text x="200" y="100" font-size="15" text-anchor="middle" class="chalk">Lino's knobs: m = 0.2, b = −4</text>`+
+    `<text x="44" y="146" font-size="18" font-weight="700" class="chalk">1. z = 0.2 × 25 − 4 = 1</text>`+
+    `<text x="44" y="186" font-size="18" font-weight="700" class="chalk">2. sigmoid(1) = 0.73 = 73%</text>`+
+    `<text x="44" y="226" font-size="18" font-weight="700" class="chalk">3. 73% ≥ 50%</text>`+
+    `<text x="200" y="290" class="disp" font-size="40" text-anchor="middle" fill="${K.lemon}">→ POUR!</text>`),
+  P(3,340, bg(400,340,K.tint,.2)+R(16,16,368,308,K.yellow,`rx="8" stroke="${K.ink}" stroke-width="3"`)+R(22,22,356,296,K.board,`rx="4" stroke="${K.ink}" stroke-width="2"`)+R(22,22,356,296,'url(#dotsW)','opacity=".35"')+
+    `<text x="200" y="58" class="disp" font-size="22" text-anchor="middle" fill="${K.yellow}">RUNNER AT 10 MINUTES</text>`+
+    `<text x="200" y="100" font-size="15" text-anchor="middle" class="chalk">Same knobs: m = 0.2, b = −4</text>`+
+    `<text x="44" y="146" font-size="18" font-weight="700" class="chalk">1. z = 0.2 × 10 − 4 = −2</text>`+
+    `<text x="44" y="186" font-size="18" font-weight="700" class="chalk">2. sigmoid(−2) = 0.12 = 12%</text>`+
+    `<text x="44" y="226" font-size="18" font-weight="700" class="chalk">3. 12% &lt; 50%</text>`+
+    `<text x="200" y="290" class="disp" font-size="40" text-anchor="middle" fill="${K.coral}">→ DON'T POUR</text>`)
+]});
+
+pages.push({panels:[
+  P(6,360, bg(800,360,K.tint,.2)+
+    chart({...AXP,x:80,y:36,w:430,h:256,pts:[],dots:false,curves:[{f:PB}],
+      under:(sx,sy)=>R(sx(0),sy(1.12),sx(20)-sx(0),sy(-0.12)-sy(1.12),K.coral2,'opacity=".55"')+R(sx(20),sy(1.12),sx(45)-sx(20),sy(-0.12)-sy(1.12),K.lemon2,'opacity=".7"')+
+        `<text x="${sx(10)}" y="${sy(0.72)}" class="disp" font-size="22" text-anchor="middle" fill="${K.coral}" stroke="${K.ink}" stroke-width=".8">DON'T POUR</text><text x="${sx(32.5)}" y="${sy(0.28)}" class="disp" font-size="22" text-anchor="middle" fill="${K.navy}">POUR</text>`+
+        `<line x1="${sx(0)}" y1="${sy(0.5)}" x2="${sx(45)}" y2="${sy(0.5)}" stroke="${K.ink}" stroke-width="2" stroke-dasharray="6 5"/><line x1="${sx(20)}" y1="${sy(1.12)}" x2="${sx(20)}" y2="${sy(-0.12)}" stroke="${K.ink}" stroke-width="3"/>`,
+      over:(sx,sy)=>rdots(RTR)(sx,sy)+`<circle cx="${sx(20)}" cy="${sy(0.5)}" r="7" fill="${K.yellow}" stroke="${K.ink}" stroke-width="2.5"/><text x="${sx(20)+10}" y="${sy(0.5)+22}" font-size="14" font-weight="700" stroke="${K.white}" stroke-width="3" paint-order="stroke">20 min = 50%</text>`})+
+    maya(632,350,1.1,{mood:'happy',arms:'point',flip:true})+lino(748,350,.75,{face:'!_!',arms:'up'})+
+    B(690,40,'The curve crosses 50%|at exactly 20 minutes!',748,242,{size:15})+
+    B(626,122,'That cut-off is the|**decision boundary**.',632,180,{size:15})),
+  P(3,320, bg(400,320,K.white,.15)+NOTE(22,38,'The **threshold** is the cut-off|chance for saying YES (here 50%).|p ≥ 50% exactly when z ≥ 0:|0.2·x − 4 ≥ 0, so x ≥ 20 minutes.',{size:14})+
+    lino(320,306,.8,{face:'20!'})+
+    B(150,240,'Run 20+ minutes?|Cup coming up!',300,252,{size:15})),
+  P(3,320, bg(400,320,K.white,.15)+
+    chart({...AXP,xt:[0,20,40],x:64,y:110,w:300,h:160,padL:50,padB:30,padT:10,padR:12,xl:'',yl:'',ylo:40,pts:[],dots:false,
+      curves:[{f:x=>SG(0.1*x-2),c:K.navy,w:3.5,op:.6},{f:PB},{f:x=>SG(0.6*x-12),c:K.coral,w:3.5}],
+      over:(sx,sy)=>`<text x="${sx(44)}" y="${sy(0.62)}" font-size="12" font-weight="700" text-anchor="end" fill="${K.navy}">m = 0.1: slow switch</text><text x="${sx(1)}" y="${sy(0.9)}" font-size="12" font-weight="700" fill="${K.coral}">m = 0.6: sudden</text>`})+
+    B(200,40,'Same two knobs as Issue #1! **m** sets how|sudden the switch is. **b** slides the S|left or right.',null,null,{size:13}))
+]});
+pages[pages.length-1].panels.push(recapX(6,210,'• Logistic regression: **score** with a line (z = m·x + b), then **squish** with the sigmoid.|• **Threshold** 50% → **decision boundary** at 20 minutes.|• m sets how sudden the switch is. b slides it.'));
+
+/* ---------- CHAPTER 4 ---------- */
+pages.push(chTitle(4,'THE SURPRISE PENALTY','In which being sure and wrong hurts the most.',K.tint,
+  land(x=>200-0.0011*(x-640)**2,470,800,250,K.yellow2)+`<circle cx="545" cy="${200-0.0011*95**2-14}" r="13" fill="${K.coral}" stroke="${K.ink}" stroke-width="3"/>`));
+
+pages.push({panels:[
+  P(6,340, bg(800,340,K.tint,.2)+
+    chart({...AXP,x:80,y:36,w:430,h:244,pts:[],dots:false,curves:[{f:PG}],
+      under:(sx,sy)=>`<line x1="${sx(0)}" y1="${sy(0.5)}" x2="${sx(45)}" y2="${sy(0.5)}" stroke="${K.ink}" stroke-width="2" stroke-dasharray="6 5"/>`,over:rdots(RTR)})+
+    CAP(94,60,'First guess: m = 0.05, b = 0',{size:14})+
+    maya(632,330,1.1,{mood:'sad',arms:'hips'})+lino(748,330,.75,{face:'^_^'})+
+    B(690,40,'My first guess!',748,222,{size:15})+
+    B(626,116,'It says 50% or more for|EVERYONE. We\'d pour for|runners who never stop!',632,162,{size:15})),
+  P(3,340, bg(400,340,K.white,.15)+NOTE(22,38,'Grade a guess with the|**surprise penalty** (math name:|**log loss**). Said 90% yes and they|stopped? Tiny penalty. Said 99%|yes and they didn\'t? HUGE penalty.',{size:14})+
+    lino(320,330,.8,{face:'O_O'})),
+  P(3,340, bg(400,340,K.white,.15)+CAP(12,24,'The runner STOPPED. We had said…',{size:14})+
+    [[0.9,'90%'],[0.5,'50%'],[0.1,'10%'],[0.01,'1%']].map(([p,l],i)=>{const y=62+i*52,w=-Math.log(p)*44;
+      return `<text x="64" y="${y+20}" class="disp" font-size="24" text-anchor="middle">${l}</text>`+R(108,y,w,30,i<2?K.lemon:K.coral,`stroke="${K.ink}" stroke-width="2.5"`)+`<text x="${116+w}" y="${y+21}" font-size="16" font-weight="700">${(-Math.log(p)).toFixed(2)}</text>`}).join('')+
+    TX(200,292,'Sure and wrong hurts most!',{size:15,cls:'lt'})+`<text x="200" y="318" font-size="12.5" font-weight="700" text-anchor="middle">penalty = −log(chance we gave the real answer)</text>`)
+]});
+
+pages.push({panels:[
+  P(6,340, (()=>{const f=x=>310-0.0013*(x-430)**2;
+    return bg(800,340,K.tint,.2)+land(f,0,800,340)+
+      `<line x1="430" y1="310" x2="430" y2="264" stroke="${K.ink}" stroke-width="4"/><path d="M430,264 L470,274 L430,286Z" fill="${K.coral}" stroke="${K.ink}" stroke-width="2.5"/>`+
+      `<text x="430" y="332" class="disp" font-size="18" text-anchor="middle" fill="${K.navy}">LOWEST AVERAGE PENALTY: 0.37</text>`+
+      [700,660,615,570,525,480].map((x,i,a)=>i<a.length-1?`<path d="M${x},${f(x)-10} Q${(x+a[i+1])/2},${Math.min(f(x),f(a[i+1]))-24} ${a[i+1]+4},${f(a[i+1])-12}" fill="none" stroke="${K.coral}" stroke-width="3" marker-end="url(#arrC)"/>`:'').join('')+
+      `<text x="790" y="${f(712)+30}" font-size="14" font-weight="700" text-anchor="end">first guess: 0.59</text>`+
+      lino(480,f(480)+2,.7,{face:'^_^'})+maya(120,f(120)+2,.8,{mood:'smile',arms:'point'})+
+      B(250,42,'Same trick as Issue #1: step downhill!|No shortcut formula this time,|so gradient descent does the work.',140,f(120)-130,{size:15})+
+      B(620,46,'Average penalty: 0.59 → 0.37!',500,f(480)-100,{size:15})})()),
+  P(3,350, bg(400,350,K.white,.15)+CAP(12,24,'The best knobs: m = 0.20, b = −4.0',{size:14})+
+    chart({...AXP,xt:[0,20,40],x:64,y:60,w:310,h:170,padL:50,padB:30,padT:10,padR:12,xl:'',yl:'',pts:[],dots:false,curves:[{f:PB}],
+      under:(sx,sy)=>`<line x1="${sx(20)}" y1="${sy(1.12)}" x2="${sx(20)}" y2="${sy(-0.12)}" stroke="${K.ink}" stroke-width="2" stroke-dasharray="5 4"/>`,
+      over:(sx,sy)=>rdots(RTR,5.5)(sx,sy)+[[16,1],[23,0],[27,0]].map(([a,b])=>`<circle cx="${sx(a)}" cy="${sy(b)}" r="11" fill="none" stroke="${K.coral}" stroke-width="3"/>`).join('')})+
+    TX(200,286,'13 of 16 runners right: **81%** accuracy.',{size:14})+
+    TX(200,308,'Misses (circled): one early-thirsty runner,',{size:12.5})+TX(200,326,'two with their own water bottles.',{size:12.5})),
+  P(3,350, bg(400,350,K.yellow2,.3)+CAP(12,24,'Pop quiz! 6 brand-new runners:',{size:14})+
+    `<line x1="20" y1="70" x2="380" y2="70" stroke="${K.ink}" stroke-width="2.5"/>`+
+    [['Min',50],['Chance',130],['Guess',214],['Real',296],['',354]].map(([t,x])=>`<text x="${x}" y="62" font-size="13" font-weight="700" text-anchor="middle">${t}</text>`).join('')+
+    RTE.map(([m,v],i)=>{const p=PB(m),g=p>=0.5,y=94+i*26;return `<text x="50" y="${y}" font-size="16" text-anchor="middle">${m}</text><text x="130" y="${y}" font-size="16" text-anchor="middle" font-weight="700" fill="${K.line}">${pct(p)}</text><text x="214" y="${y}" font-size="16" text-anchor="middle">${g?'yes':'no'}</text><text x="296" y="${y}" font-size="16" text-anchor="middle">${v?'yes':'no'}</text><text x="354" y="${y}" font-size="17" text-anchor="middle" font-weight="700" fill="${g===!!v?K.navy:K.coral}">${g===!!v?'✓':'✗'}</text>`}).join('')+
+    TX(200,276,'5 of 6 right: **83%**. About the same as|training, so no overfitting!',{size:13})+
+    lino(352,346,.42,{face:'B)'}))
+]});
+pages[pages.length-1].panels.push(recapX(6,210,'• **Log loss** = the average surprise penalty. Confident and wrong costs the most.|• Gradient descent finds the best knobs: m = 0.20, b = −4.0 (log loss 0.37).|• **Accuracy**: 81% on training runners, 83% on new ones.'));
+
+/* ---------- CHAPTER 5 ---------- */
+pages.push(chTitle(5,'THE FUN RUN','In which a 90% chance meets a water bottle.',K.lemon2,
+  `<g transform="translate(600,215)">${runner(0,0,1.6,{c:K.coral,num:31,bottle:true,happy:true})}</g>`));
+
+pages.push({panels:[
+  P(6,340, (()=>{let bunt='';for(let i=0;i<20;i++){const x=i*42;bunt+=`<path d="M${x},${14+Math.sin(i)*3} L${x+42},${14+Math.sin(i+1)*3} L${x+21},${44}Z" fill="${[K.coral,K.yellow,K.lemon,K.white][i%4]}" stroke="${K.ink}" stroke-width="2"/>`}
+    return bg(800,340,K.tint,.25)+`<path d="M0,14 Q400,40 800,14" fill="none" stroke="${K.ink}" stroke-width="2"/>`+bunt+
+      tree(740,250,.85,K.coral)+R(0,250,800,90,K.lemon,`stroke="${K.ink}" stroke-width="3"`)+`<path d="M0,290 L800,270 L800,320 L0,340Z" fill="${K.coral2}" stroke="${K.ink}" stroke-width="3"/>`+
+      `<g transform="translate(400,96)">${R(-110,-28,220,48,K.navy,`stroke="${K.ink}" stroke-width="3"`)}<text x="0" y="5" class="disp" font-size="26" text-anchor="middle" fill="${K.yellow}" data-fit="200">MILE 3 · LEMONADE</text></g>`+
+      maya(150,282,.95,{mood:'det',arms:'hold'})+R(98,206,104,10,K.yellow2,`stroke="${K.ink}" stroke-width="2.5"`)+[0,1,2,3,4,5,6].map(i=>cup(108+i*14,206,.8)).join('')+
+      lino(268,282,.75,{face:'p%'})+`<g transform="translate(300,200) rotate(8)">${R(-24,-34,48,40,K.navy,`stroke="${K.ink}" stroke-width="2.5"`)}<text x="0" y="-16" class="lcd" font-size="16" text-anchor="middle">55%</text><text x="0" y="-2" class="lcd" font-size="15" text-anchor="middle">POUR</text></g>`+
+      runner(520,326,.9,{c:K.navy2,num:21,flip:true})+runner(610,318,.9,{c:K.yellow,num:24,flip:true,sk:K.skin3})+runner(690,328,.85,{c:K.lemon,num:28,flip:true,hair:'#7A3E12'})+
+      CAP(14,72,'Saturday. The Fall Fun Run.',{size:15})+
+      B(150,124,'7 cups poured for the|7 runners at 50%+!',150,164,{size:15})+
+      B(560,128,'Runner 21: 55%.|Pour! Pour!',300,170,{size:15})})()),
+  P(3,350, bg(400,350,K.white,.15)+CAP(12,24,'Race-day scoreboard: 10 runners',{size:14})+
+    `<line x1="14" y1="66" x2="386" y2="66" stroke="${K.ink}" stroke-width="2.5"/>`+
+    [['Min',44],['Chance',118],['Poured?',202],['Stopped?',290],['',358]].map(([t,x])=>`<text x="${x}" y="58" font-size="13" font-weight="700" text-anchor="middle">${t}</text>`).join('')+
+    [[6,0],[11,0],[17,0],[21,1],[24,1],[28,1],[31,0],[35,1],[38,1],[44,1]].map(([m,v],i)=>{const p=PB(m),g=p>=0.5,y=86+i*22,ok=g===!!v;
+      return (ok?'':R(14,y-16,372,22,K.coral2,''))+`<text x="44" y="${y}" font-size="14.5" text-anchor="middle">${m}</text><text x="118" y="${y}" font-size="14.5" text-anchor="middle" font-weight="700" fill="${K.line}">${pct(p)}</text><text x="202" y="${y}" font-size="14.5" text-anchor="middle">${g?'yes':'no'}</text><text x="290" y="${y}" font-size="14.5" text-anchor="middle">${v?'yes':'no'}</text><text x="358" y="${y}" font-size="15" text-anchor="middle" font-weight="700" fill="${ok?K.navy:K.coral}">${ok?'✓':'✗'}</text>`}).join('')+
+    TX(200,328,'9 of 10 right! One poured cup went unused.',{size:13})),
+  P(3,350, bg(400,350,K.yellow2,.3)+
+    `<path d="M0,290 L400,276 L400,320 L0,336Z" fill="${K.coral2}" stroke="${K.ink}" stroke-width="3"/>`+
+    runner(230,318,1.05,{c:K.coral,num:31,bottle:true,happy:true,flip:true})+
+    R(40,236,80,10,K.yellow2,`stroke="${K.ink}" stroke-width="2"`)+cup(80,236,1.1)+
+    lino(76,340,.55,{face:'O_O'})+maya(350,340,.72,{mood:'smile',arms:'hips'})+
+    SFX(300,110,'SWOOSH!',{size:26,fill:K.yellow,rot:-8})+
+    B(110,40,'90% sure… and he|ran right by?!',76,250,{size:14})+
+    B(268,170,'90% means 1 in 10 won\'t.|A chance isn\'t a promise!',350,232,{size:14}))
+]});
+
+pages.push({panels:[
+  P(6,330, bg(800,330,K.white,.15)+CAP(14,28,'What if Xiri picks a different threshold? (Same 10 race-day runners.)',{size:15})+
+    [['30%',8,2,0,K.tint],['50%',7,1,0,K.lemon2],['80%',5,1,2,K.coral2]].map(([t,p,w,mi,c],i)=>{const x=24+i*184;
+      return R(x,52,170,170,c,`stroke="${K.ink}" stroke-width="3"`)+`<text x="${x+85}" y="92" class="disp" font-size="30" text-anchor="middle">${t}</text>`+
+        `<text x="${x+16}" y="128" font-size="15">Cups poured: <tspan font-weight="700">${p}</tspan></text><text x="${x+16}" y="156" font-size="15">Wasted: <tspan font-weight="700">${w}</tspan></text><text x="${x+16}" y="184" font-size="15">Missed thirsty: <tspan font-weight="700">${mi}</tspan></text>`}).join('')+
+    `<path d="M40,250 L560,250" stroke="${K.ink}" stroke-width="3" marker-start="url(#arr)" marker-end="url(#arr)"/><text x="40" y="276" font-size="13" font-weight="700">lower: pour more, waste more</text><text x="560" y="276" font-size="13" font-weight="700" text-anchor="end">higher: pour less, miss more</text>`+
+    maya(640,320,1,{mood:'think',arms:'chin'})+lino(748,320,.7,{face:'?_?'})+
+    B(690,60,'Which is best?',748,214,{size:15})+
+    B(650,140,'Depends which mistake|costs more: a wasted|cup or a thirsty runner.',640,170,{size:14})),
+  P(3,340, bg(400,340,K.white,.15)+CAP(12,24,'Add a second input: temperature.',{size:14})+
+    chart({x0:0,x1:45,y0:12,y1:36,xt:[0,15,30,45],yt:[15,25,35],x:60,y:52,w:310,h:200,padL:46,padB:40,padT:10,padR:14,xl:'Minutes run',xlo:32,yl:'Temp (°C)',ylo:36,pts:[],dots:false,
+      lines:[{m:-LR.two.w[0]/LR.two.w[1],b:-LR.two.w[2]/LR.two.w[1],w:4}],
+      over:(sx,sy)=>LR.two.pts.map(([a,t,v])=>v?`<circle cx="${sx(a)}" cy="${sy(t)}" r="5" fill="${K.navy}" stroke="${K.white}" stroke-width="1.5"/>`:`<circle cx="${sx(a)}" cy="${sy(t)}" r="5" fill="${K.white}" stroke="${K.navy}" stroke-width="2.5"/>`).join('')+
+        `<text x="${sx(3)}" y="${sy(14)}" font-size="12" font-weight="700" fill="${K.coral}" stroke="${K.white}" stroke-width="3" paint-order="stroke">NO side</text><text x="${sx(44)}" y="${sy(34)}" font-size="12" font-weight="700" text-anchor="end" fill="${K.navy}">YES side</text>`})+
+    TX(200,316,'With two inputs, the boundary becomes a',{size:13})+TX(200,333,'straight **line**: a **linear classifier**.',{size:13})),
+  P(3,340, bg(400,340,K.white,.15)+NOTE(22,38,'Careful with logistic regression:|• A chance is not a promise.|• Pick the threshold by what each|  mistake costs.|• Its boundary is straight. Curvy|  groups need other models.',{size:14})+
+    lino(330,330,.75,{face:'^_^'})),
+  P(6,300, bg(800,300,K.navy,0)+R(0,0,800,300,'url(#dotsW)','opacity=".4"')+`<circle cx="720" cy="60" r="34" fill="${K.yellow2}" stroke="${K.ink}" stroke-width="3"/><circle cx="706" cy="52" r="34" fill="${K.navy}"/>`+
+    R(0,262,800,38,K.navy2,`stroke="${K.ink}" stroke-width="3"`)+R(250,226,300,36,K.coral2,`stroke="${K.ink}" stroke-width="3"`)+
+    `<g transform="translate(400,226) rotate(-3)">${R(-96,-60,192,60,'url(#ruled)',`stroke="${K.ink}" stroke-width="2.5"`)}<text x="0" y="-36" class="disp" font-size="16" text-anchor="middle" fill="${K.coral}" data-fit="176">SECRET TEST RUNNERS</text><text x="0" y="-14" class="disp" font-size="14" text-anchor="middle" fill="${K.navy}">NO PEEKING!</text></g>`+
+    crow(570,214,1.1,-1)+
+    CAP(14,28,'Meanwhile, that night… the crow is back.',{size:15})+
+    `<g class="bub" data-k="s" data-tx="530" data-ty="168">${TX(590,92,'Heh heh. 81%? MY model will score|100%… if I peek at the answers first.',{size:15})}</g>`+
+    OUT(30,250,'NEXT: ISSUE #4',{size:28,anchor:'start',fill:K.yellow,sw:6})+OUT(30,284,'THE DATA LEAK',{size:28,anchor:'start',fill:K.coral,sw:6}))
+]});
+pages[pages.length-1].panels.push(recapX(6,210,'• Score, squish, decide: that\'s logistic regression.|• The threshold trades wasted cups against missed runners.|• A 90% chance still misses 1 time in 10.'));
+
+/* ---------- THE END ---------- */
+pages.push({cls:'end',panels:[P(6,260, bg(800,260,K.navy,0)+R(0,0,800,260,'url(#dotsW)','opacity=".5"')+
+  OUT(400,100,'THE END',{size:84,fill:K.yellow,sw:10,fit:420})+`<text x="400" y="140" class="disp" font-size="22" text-anchor="middle" fill="${K.white}" letter-spacing="2" data-fit="460">…OF ISSUE #3. NEXT: THE SQUISH LAB, CHEAT SHEET &amp; QUIZ</text>`+
+  maya(110,250,.95,{mood:'happy',arms:'wave'})+lino(690,250,.95,{face:'^_^',arms:'wave',flip:true}))],id:'end'});
+
+/* ---------- LAB, CHEAT SHEET, QUIZ ---------- */
+pages.push({html:`<section class="hpage" id="lab" aria-labelledby="labh">
+  <div class="kicker">TRY IT YOURSELF</div>
+  <h2 id="labh">Lino's Squish Lab</h2>
+  <p>Turn the knobs to shape the S-curve, then move the threshold. Filled dots stopped for lemonade; hollow dots kept running. Wrong guesses get a coral ring. Can you beat a log loss of 0.37?</p>
+  <div class="lab">
+    <svg id="labsvg" viewBox="0 0 460 320" role="img" aria-label="Practice runners with an adjustable S-curve and threshold"></svg>
+    <div class="knobs">
+      <div class="knob"><label for="lm"><span>KNOB m (steepness)</span><span id="lmv">0.05</span></label><input type="range" id="lm" min="0" max="1" step="0.01" value="0.05"></div>
+      <div class="knob"><label for="lb"><span>KNOB b (slide)</span><span id="lbv">0.0</span></label><input type="range" id="lb" min="-20" max="5" step="0.1" value="0"></div>
+      <div class="knob" style="background:var(--lemon2)"><label for="lt"><span>THRESHOLD</span><span id="ltv">50%</span></label><input type="range" id="lt" min="0.05" max="0.95" step="0.05" value="0.5"></div>
+      <div class="score">LOG LOSS <b id="llv">0.59</b><small id="llm">Lino's first guess.</small></div>
+      <div class="score" style="background:var(--lemon);color:var(--ink)">ACCURACY <b id="acv" style="color:var(--ink)">56%</b><small id="acm" style="color:var(--ink)">9 of 16 runners right</small></div>
+      <div class="btns"><button type="button" id="bg">First guess</button><button type="button" id="bb">Best knobs</button></div>
+    </div>
+  </div>
+</section>`});
+pages.push({html:`<section class="hpage" id="cheat" aria-labelledby="ch">
+  <div class="kicker">LINO'S NOTEBOOK · TEAR-OUT PAGE</div>
+  <h2 id="ch">The Cheat Sheet</h2>
+  <div class="cheat">
+    <div class="card big"><h3>The recipe</h3><div class="eq" style="font-size:clamp(26px,5.5vw,44px)">p = sigmoid(<span class="ln">m</span>·x + <span class="ln">b</span>)</div><p>Score with a line, squish into a chance from 0 to 1, then decide with a threshold. Xiri's best knobs: m = 0.20, b = −4.0.</p></div>
+    <div class="card"><h3>Classification</h3><p>Predicting a group (yes/no, spam/not spam). Regression predicts a number. Yes = 1, no = 0.</p></div>
+    <div class="card"><h3>Probability</h3><p>A chance from 0 (never) to 1 (for sure). A straight line can't keep inside that range, so it gives silly answers like 123%.</p></div>
+    <div class="card"><h3>Sigmoid (S-curve)</h3><p>Squishes any score into 0 to 1. Score −4 → 2%, −2 → 12%, 0 → 50%, 2 → 88%, 4 → 98%.</p></div>
+    <div class="card"><h3>Threshold &amp; decision boundary</h3><p>Say YES when p ≥ threshold (often 50%). At 50%, that happens when the score is 0. Here: 20 minutes of running.</p></div>
+    <div class="card"><h3>Log loss</h3><p>The average "surprise penalty": −log(chance given to what really happened). Said 90% and right: 0.11. Said 1% and wrong: 4.61.</p></div>
+    <div class="card"><h3>Training</h3><p>Gradient descent walks downhill on log loss. Unlike linear regression, there is no shortcut formula. Best log loss here: 0.37.</p></div>
+    <div class="card big" style="background:var(--lemon2)"><h3>Accuracy</h3><p>The share of right yes/no calls: 81% on practice runners, 83% on new runners, 9 of 10 on race day.</p></div>
+    <div class="card warn"><h3>Three cautions</h3><ul><li><b>A chance isn't a promise:</b> 90% still misses 1 time in 10.</li><li><b>The threshold is a choice:</b> lower means more cups and more waste; higher means fewer cups and more missed runners.</li><li><b>Straight boundaries only:</b> with two inputs the boundary is a line. Curvy groups need other models.</li></ul></div>
+    <div class="card"><h3>Coming up</h3><p>Counting the two kinds of mistakes is the job of the <b>confusion matrix</b>. And the crow is planning a data leak.</p></div>
+  </div>
+</section>`});
+pages.push({html:`<section class="hpage" id="quiz" aria-labelledby="qh">
+  <div class="kicker">YOUR TURN</div>
+  <h2 id="qh">Yes or No?</h2>
+  <p>Tap an answer to see if you're right.</p>
+  <div class="quiz" id="quizbox"></div>
+</section>`});
+
+/* ============ render ============ */
+const book=document.getElementById('book');let pn=0,html='';
+pages.forEach((pg,i)=>{
+  if(pg.html){html+=pg.html;if(pg.html.includes('id="cheat"')===false&&i===1){} return}
+  pn++;
+  html+=`<section class="page ${pg.cls||''}"${pg.id?` id="${pg.id}"`:''}>`+pg.panels.map(p=>{const w=W[p.span];
+    const alt=p.body.replace(/<text[^>]*class="lcd"[^>]*>.*?<\/text>/g,'').match(/<tspan[^>]*>([^<]*)/g);
+    const label=alt?alt.map(t=>t.replace(/<[^>]*>/,'')).join(' ').replace(/\s+/g,' ').trim().slice(0,400):'Comic panel';
+    return `<div class="panel s${p.span}"><svg viewBox="0 0 ${w} ${p.h}" role="img" aria-label="${esc(label)}">${p.body}</svg></div>`}).join('')+
+    (pg.cls==='cover'?'':`<div class="pgno"><span>THE YES-OR-NO MACHINE</span><span>${pn}</span></div>`)+`</section>`;
+  if(pg.cls==='cover')html+=`<nav class="toc" aria-label="Chapters"><a href="#ch1">1 · Will They Stop?</a><a href="#ch2">2 · Lines Break</a><a href="#ch3">3 · Score &amp; Squish</a><a href="#ch4">4 · Surprise Penalty</a><a href="#ch5">5 · Fun Run</a><a href="#lab">Squish Lab</a><a href="#cheat">Cheat Sheet</a><a href="#quiz">Quiz</a></nav><p class="swipe">On a phone? Swipe wide panels sideways →</p>`;
+});
+book.innerHTML=html;
+
+/* ============ bubble / caption / note layout (measured) ============ */
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);e.classList.add('deco');return e}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function bbOf(g){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;g.querySelectorAll('text').forEach(t=>{const b=t.getBBox();x0=Math.min(x0,b.x);y0=Math.min(y0,b.y);x1=Math.max(x1,b.x+b.width);y1=Math.max(y1,b.y+b.height)});return {x:x0,y:y0,w:x1-x0,h:y1-y0}}
+function tailPts(r,tx,ty,hw=9){const cx=r.x+r.w/2,cy=r.y+r.h/2;
+  if(ty>r.y+r.h-4&&Math.abs(tx-cx)<r.w/2+60||ty>r.y+r.h+20){const bx=clamp(cx+(tx-cx)*.55,r.x+r.h/2+4,r.x+r.w-r.h/2-4),by=r.y+r.h;return [[bx-hw,by],[bx+hw,by],[tx,ty],0,-1]}
+  if(ty<r.y+4&&Math.abs(tx-cx)<r.w/2+60||ty<r.y-20){const bx=clamp(cx+(tx-cx)*.55,r.x+r.h/2+4,r.x+r.w-r.h/2-4),by=r.y;return [[bx-hw,by],[bx+hw,by],[tx,ty],0,1]}
+  const bx=tx>cx?r.x+r.w:r.x,by=clamp(ty,r.y+r.h*.3,r.y+r.h*.7);return [[bx,by-hw],[bx,by+hw],[tx,ty],tx>cx?-1:1,0]}
+function layout(){
+  document.querySelectorAll('.deco').forEach(e=>e.remove());
+  document.querySelectorAll('[data-fit]').forEach(t=>{t.removeAttribute('textLength');t.removeAttribute('lengthAdjust');const L=t.getComputedTextLength(),m=+t.dataset.fit;if(L>m){t.setAttribute('textLength',m);t.setAttribute('lengthAdjust','spacingAndGlyphs')}});
+  document.querySelectorAll('g.bub').forEach(g=>{
+    const b=bbOf(g),k=g.dataset.k,first=g.firstChild;
+    const r={x:b.x-13,y:b.y-8,w:b.w+26,h:b.h+16};
+    const fill=k==='x'?K.yellow:K.white;
+    if(k==='x'){const cx=r.x+r.w/2,cy=r.y+r.h/2,rx=r.w/2+16,ry=r.h/2+14;let pts=[];for(let i=0;i<28;i++){const a=i/28*Math.PI*2,f=i%2?1:.86;pts.push((cx+Math.cos(a)*rx*f).toFixed(1)+','+(cy+Math.sin(a)*ry*f).toFixed(1))}
+      if(g.dataset.tx!=null){const t=tailPts({x:cx-rx*.7,y:cy-ry*.75,w:rx*1.4,h:ry*1.5},+g.dataset.tx,+g.dataset.ty,10);g.insertBefore(el('polygon',{points:t.slice(0,3).map(p=>p.join(',')).join(' '),fill,stroke:K.ink,'stroke-width':3,'stroke-linejoin':'round'}),first)}
+      g.insertBefore(el('polygon',{points:pts.join(' '),fill,stroke:K.ink,'stroke-width':3,'stroke-linejoin':'round'}),first);return}
+    const rx=Math.min(r.h/2,20);
+    if(g.dataset.tx!=null){const t=tailPts(r,+g.dataset.tx,+g.dataset.ty);
+      g.insertBefore(el('polygon',{points:t.slice(0,3).map(p=>p.join(',')).join(' '),fill,stroke:K.ink,'stroke-width':3,'stroke-linejoin':'round'}),first);
+      g.insertBefore(el('rect',{x:r.x,y:r.y,width:r.w,height:r.h,rx,fill,stroke:K.ink,'stroke-width':3}),first);
+      const [p1,p2,tip,dx,dy]=t,ins=(p)=>[p[0]+dx*2.6+(p===p1?(dy?1.6:0):(dy?-1.6:0)),p[1]+dy*2.6+(p===p1?(dx?1.6:0):(dx?-1.6:0))];
+      const a=ins(p1),c=ins(p2),tp=[tip[0]+(a[0]+c[0]-2*tip[0])*.12,tip[1]+(a[1]+c[1]-2*tip[1])*.12];
+      g.insertBefore(el('polygon',{points:[a,c,tp].map(p=>p.join(',')).join(' '),fill}),first);
+    } else g.insertBefore(el('rect',{x:r.x,y:r.y,width:r.w,height:r.h,rx,fill,stroke:K.ink,'stroke-width':3}),first);
+  });
+  document.querySelectorAll('g.cap').forEach(g=>{const b=bbOf(g),r={x:b.x-9,y:b.y-6,w:b.w+18,h:b.h+12},first=g.firstChild;
+    g.insertBefore(el('rect',{x:r.x+4,y:r.y+4,width:r.w,height:r.h,fill:K.ink}),first);
+    g.insertBefore(el('rect',{x:r.x,y:r.y,width:r.w,height:r.h,fill:K.yellow,stroke:K.ink,'stroke-width':2.5}),first)});
+  document.querySelectorAll('g.note').forEach(g=>{const b=bbOf(g),r={x:b.x-22,y:b.y-16,w:b.w+36,h:b.h+24},first=g.firstChild;
+    g.insertBefore(el('rect',{x:r.x+5,y:r.y+5,width:r.w,height:r.h,fill:K.ink}),first);
+    g.insertBefore(el('rect',{x:r.x,y:r.y,width:r.w,height:r.h,fill:'url(#ruled)',stroke:K.ink,'stroke-width':2.5}),first);
+    g.insertBefore(el('line',{x1:r.x+12,y1:r.y,x2:r.x+12,y2:r.y+r.h,stroke:K.coral,'stroke-width':1.5}),first);
+    for(let x=r.x+26;x<r.x+r.w-10;x+=26)g.appendChild(el('circle',{cx:x,cy:r.y,r:4.5,fill:K.white,stroke:K.ink,'stroke-width':2}))});
+}
+layout();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(layout);
+window.addEventListener('load',layout);
+
+/* ============ Squish Lab ============ */
+(function(){
+  const svg=document.getElementById('labsvg'),lm=document.getElementById('lm'),lb=document.getElementById('lb'),lt=document.getElementById('lt');
+  function draw(){const m=+lm.value,b=+lb.value,t=+lt.value,f=x=>SG(m*x+b);
+    let loss=0,ok=0;RTR.forEach(([x,y])=>{const p=Math.min(1-1e-9,Math.max(1e-9,f(x)));loss-=y?Math.log(p):Math.log(1-p);if((p>=t)===!!y)ok++});loss/=RTR.length;
+    const bnd=m>0?(Math.log(t/(1-t))-b)/m:null;
+    svg.innerHTML=chart({...AXP,x:64,y:22,w:380,h:240,frame:false,padL:0,pts:[],dots:false,curves:[{f}],
+      under:(sx,sy)=>`<line x1="${sx(0)}" y1="${sy(t)}" x2="${sx(45)}" y2="${sy(t)}" stroke="${K.ink}" stroke-width="2" stroke-dasharray="6 5"/>`+(bnd!==null&&bnd>=0&&bnd<=45?`<line x1="${sx(bnd)}" y1="${sy(1.12)}" x2="${sx(bnd)}" y2="${sy(-0.12)}" stroke="${K.ink}" stroke-width="2.5"/><text x="${sx(bnd)+(bnd>30?-6:6)}" y="${sy(0.62)}" font-size="12" font-weight="700" text-anchor="${bnd>30?'end':'start'}" stroke="${K.white}" stroke-width="3" paint-order="stroke">boundary: ${bnd.toFixed(1)} min</text>`:''),
+      over:(sx,sy)=>rdots(RTR)(sx,sy)+RTR.filter(([x,y])=>(f(x)>=t)!==!!y).map(([x,y])=>`<circle cx="${sx(x)}" cy="${sy(y)}" r="11" fill="none" stroke="${K.coral}" stroke-width="3"/>`).join('')});
+    document.getElementById('lmv').textContent=m.toFixed(2);document.getElementById('lbv').textContent=b.toFixed(1);document.getElementById('ltv').textContent=Math.round(t*100)+'%';
+    document.getElementById('llv').textContent=loss.toFixed(2);
+    document.getElementById('llm').textContent=loss<=0.3723?'The lowest possible! Those are the best knobs.':loss<0.4?'Very close to the best (0.37).':loss<0.6?'Getting there. Lower is better.':'Lots of surprise. Keep turning.';
+    document.getElementById('acv').textContent=Math.round(ok/RTR.length*100)+'%';document.getElementById('acm').textContent=ok+' of '+RTR.length+' runners right';}
+  [lm,lb,lt].forEach(e=>e.addEventListener('input',draw));
+  document.getElementById('bg').addEventListener('click',()=>{lm.value=.05;lb.value=0;lt.value=.5;draw()});
+  document.getElementById('bb').addEventListener('click',()=>{lm.value=.2;lb.value=-4;lt.value=.5;draw()});
+  draw();
+})();
+
+/* ============ Quiz ============ */
+(function(){
+  const Q=[{q:'Which one is a classification question?',o:['How many cups will I sell?','Will this runner stop: yes or no?','How hot will it be tomorrow?'],a:1,w:'Classification predicts a group, like yes or no. The other two predict numbers, which is regression.'},
+    {q:'A runner has run 30 minutes. With m = 0.2 and b = −4, the score is z = 0.2 × 30 − 4 = 2. What chance does the S-curve give?',o:['2%','50%','88%'],a:2,w:'sigmoid(2) ≈ 0.88, so an 88% chance. That is above 50%, so Xiri pours.'},
+    {q:'What does the sigmoid always give back?',o:['A number between 0 and 1','Exactly 0 or exactly 1','Any number, even 123'],a:0,w:'It squishes any score into the 0-to-1 range, so it always works as a chance.'},
+    {q:'Which guess gets the biggest surprise penalty (log loss)?',o:['Said 60% yes, and they stopped','Said 50%, and they stopped','Said 99% yes, and they did NOT stop'],a:2,w:'Being very sure and wrong costs the most: about 4.6, versus 0.51 and 0.69.'},
+    {q:'Xiri lowers the threshold from 50% to 30%. What happens?',o:['She pours more cups: more waste, fewer missed runners','She pours fewer cups and misses more runners','Nothing changes'],a:0,w:'A lower bar says YES more often. On race day: 8 cups poured, 2 wasted, 0 missed.'}];
+  const box=document.getElementById('quizbox');
+  box.innerHTML=Q.map((q,i)=>`<div class="q"><h3>Q${i+1}. ${q.q}</h3><div class="opts">${q.o.map((o,j)=>`<button type="button" data-q="${i}" data-o="${j}">${o}</button>`).join('')}</div><div class="fb" id="qf${i}" aria-live="polite"></div><div class="ans" id="qa${i}" hidden>${q.w}</div></div>`).join('');
+  box.addEventListener('click',e=>{const b=e.target.closest('button[data-q]');if(!b)return;const i=+b.dataset.q,j=+b.dataset.o,q=Q[i];
+    b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('right','wrong'));
+    b.classList.add(j===q.a?'right':'wrong');document.getElementById('qf'+i).textContent=j===q.a?'Yes! You got it.':'Not quite. Try another one.';
+    if(j===q.a)document.getElementById('qa'+i).hidden=false});
+})();
+</script>
+<style>.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}</style>
+<style>:root{--coral2:#FFC2B8}.opts{display:flex;flex-wrap:wrap;gap:8px}.opts button.right{background:var(--lemon)}.opts button.wrong{background:var(--coral2)}</style>
+
+</body>
+</html>
