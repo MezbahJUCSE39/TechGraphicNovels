@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A comic that teaches neural networks and backpropagation to beginners, starring Xiri and Lino.">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>The Blame Game</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=VT323&display=swap">
+<style>
+/* Layout: comic pages (white sheets, ink borders, offset shadow) on a navy halftone ground; 6-column panel grid that stacks on phones.
+   Single deliberate look (printed comic), so colors are fixed rather than theme-switched. */
+:root{
+  --ink:#0B1026; --navy:#16245E; --navy2:#22357F; --tint:#DCE4FF;
+  --yellow:#FFD23F; --yellow2:#FFE98A; --lemon:#B5E61D; --lemon2:#DDF59A;
+  --coral:#FF6B57; --white:#FFFFFF; --line:#FF2E93;
+  --disp:'Bangers','Impact','Arial Black',sans-serif;
+  --letter:'Comic Neue','Comic Sans MS','Chalkboard SE','Trebuchet MS',sans-serif;
+  --lcd:'VT323','Courier New',monospace;
+  color-scheme:light;
+}
+html{background:var(--navy)}
+body{
+  background-color:var(--navy);
+  background-image:radial-gradient(rgba(255,255,255,.08) 1.6px,transparent 1.8px);
+  background-size:14px 14px;
+  color:var(--ink); font-family:var(--letter); font-size:17px; line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:28px 64px;
+}
+.book{max-width:940px;margin:0 auto;display:grid;gap:44px}
+.page{
+  background:var(--white);border:4px solid var(--ink);box-shadow:10px 10px 0 var(--ink);
+  padding:14px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;
+}
+.panel{border:4px solid var(--ink);background:var(--white);overflow:hidden;min-width:0}
+.panel svg{display:block;width:100%;height:auto}
+.s6{grid-column:span 6}.s4{grid-column:span 4}.s3{grid-column:span 3}.s2{grid-column:span 2}
+.pgno{grid-column:1/-1;display:flex;justify-content:space-between;font-family:var(--disp);letter-spacing:.06em;font-size:15px;color:var(--navy);margin-top:-2px}
+svg text{font-family:var(--letter)}
+.lt{font-weight:400;fill:var(--ink)}
+.lt .b{font-weight:700;text-decoration:underline;text-decoration-thickness:2px}
+.disp{font-family:var(--disp);letter-spacing:.03em}
+.nt{font-family:var(--disp);letter-spacing:.05em;fill:var(--navy)}
+.lcd{font-family:var(--lcd);fill:var(--lemon)}
+.chalk{fill:#F4F7FF}
+/* contents strip */
+.toc{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:-20px}
+.toc a{font-family:var(--disp);letter-spacing:.05em;font-size:18px;color:var(--ink);background:var(--yellow);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:4px 12px;text-decoration:none}
+.toc a:hover,.toc a:focus-visible{background:var(--lemon);outline:none;transform:translate(-1px,-1px)}
+/* HTML pages: lab, cheat sheet, quiz */
+.hpage{background:var(--white);border:4px solid var(--ink);box-shadow:10px 10px 0 var(--ink);padding:22px}
+.hpage h2{font-family:var(--disp);font-weight:400;letter-spacing:.04em;font-size:clamp(34px,6vw,52px);line-height:1;margin:0 0 6px;text-wrap:balance}
+.hpage .kicker{font-family:var(--disp);letter-spacing:.08em;color:var(--coral);font-size:18px}
+.hpage p{max-width:65ch;margin:6px 0 14px}
+.lab{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;align-items:start}
+.lab svg{width:100%;height:auto;display:block;border:4px solid var(--ink);background:var(--white)}
+.knobs{display:grid;gap:14px}
+.knob{border:3px solid var(--ink);padding:10px 12px;background:var(--yellow2)}
+.knob label{font-family:var(--disp);letter-spacing:.05em;font-size:20px;display:flex;justify-content:space-between}
+.knob input{width:100%;accent-color:var(--navy)}
+.score{border:3px solid var(--ink);background:var(--navy);color:var(--white);padding:10px 12px;font-family:var(--disp);letter-spacing:.05em;font-size:22px}
+.score b{color:var(--yellow);font-weight:400;font-size:34px;font-variant-numeric:tabular-nums}
+.score small{display:block;font-family:var(--letter);letter-spacing:0;font-size:15px;color:var(--tint)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button{font-family:var(--disp);letter-spacing:.05em;font-size:17px;border:3px solid var(--ink);background:var(--white);color:var(--ink);padding:5px 12px;box-shadow:3px 3px 0 var(--ink);cursor:pointer}
+button:hover{background:var(--lemon2)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--line);outline-offset:2px}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.cheat{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{border:3px solid var(--ink);padding:12px 14px;background:var(--white);min-width:0}
+.card h3{font-family:var(--disp);font-weight:400;letter-spacing:.05em;font-size:24px;margin:0 0 4px;color:var(--navy)}
+.card p{margin:0}
+.card.big{grid-column:1/-1;background:var(--yellow)}
+.card.warn{background:var(--coral);color:var(--ink)}
+.eq{font-family:var(--disp);letter-spacing:.06em;font-size:clamp(34px,7vw,56px);line-height:1}
+.eq .ln{color:var(--line)}
+.card ul{margin:4px 0 0;padding-left:20px}
+.quiz{display:grid;gap:14px}
+.q{border:3px solid var(--ink);padding:12px 14px;display:grid;gap:8px;background:var(--tint)}
+.q.bonus{background:var(--lemon2)}
+.q h3{font-family:var(--disp);font-weight:400;letter-spacing:.05em;font-size:23px;margin:0}
+.qrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.qrow input{font-family:var(--letter);font-size:18px;width:110px;border:3px solid var(--ink);padding:4px 8px;font-variant-numeric:tabular-nums}
+.fb{font-weight:700;min-height:1.4em}
+.ans{background:var(--white);border:3px dashed var(--ink);padding:8px 12px;font-variant-numeric:tabular-nums}
+.tbc{font-family:var(--disp)}
+.swipe{display:none;text-align:center;color:var(--yellow);font-family:var(--disp);letter-spacing:.06em;font-size:17px;margin-top:-28px}
+@media (max-width:700px){
+  .page{padding:8px;gap:8px;box-shadow:6px 6px 0 var(--ink)}
+  .panel{grid-column:span 6}
+  .s6{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .s6 svg{min-width:560px}
+  .swipe{display:block}
+  .lab,.cheat{grid-template-columns:minmax(0,1fr)}
+  .hpage{padding:14px;box-shadow:6px 6px 0 var(--ink)}
+}
+@media (prefers-reduced-motion:no-preference){
+  .toc a,button{transition:transform .12s,background .12s}
+}
+</style>
+</head>
+<body>
+
+
+<!-- shared SVG patterns -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="dots" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="#0B1026" opacity=".28"/></pattern>
+    <pattern id="dotsW" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="1.7" fill="#FFFFFF" opacity=".22"/></pattern>
+    <pattern id="dotsC" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.5" fill="#FF6B57" opacity=".55"/></pattern>
+    <pattern id="ruled" width="20" height="17" patternUnits="userSpaceOnUse"><rect width="20" height="17" fill="#FFFFFF"/><line x1="0" y1="16.5" x2="20" y2="16.5" stroke="#B9C7F5" stroke-width="1"/></pattern>
+    <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" fill="#FFE98A"/><line x1="0" y1="0" x2="0" y2="10" stroke="#FF6B57" stroke-width="3"/></pattern>
+    <linearGradient id="sunset" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16245E"/><stop offset=".45" stop-color="#FF6B57"/><stop offset="1" stop-color="#FFD23F"/></linearGradient>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#0B1026"/></marker>
+    <marker id="arrC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#FF6B57"/></marker>
+    <marker id="arrW" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#F4F7FF"/></marker>
+    <marker id="arrL" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#FF2E93"/></marker>
+  </defs>
+</svg>
+
+<p style="text-align:center;margin:0 0 -20px"><a href="index.html" style="font-family:var(--disp);letter-spacing:.06em;font-size:18px;color:var(--yellow);text-decoration:none">← ALL COMICS</a></p>
+<main class="book" id="book"></main>
+
+<script>
+/* ============ palette & data ============ */
+const K={ink:'#0B1026',navy:'#16245E',navy2:'#22357F',tint:'#DCE4FF',tint2:'#B9C7F5',yellow:'#FFD23F',yellow2:'#FFE98A',lemon:'#B5E61D',lemon2:'#DDF59A',coral:'#FF6B57',coral2:'#FFC2B8',white:'#FFFFFF',line:'#FF2E93',skin:'#F0CBA8',skin2:'#E8B48A',skin3:'#5E3A22',hair:'#1B1230',chalk:'#F4F7FF',board:'#1C2B66'};
+const D=[[18,10],[22,14],[25,24],[28,23],[31,26],[34,22],[37,23],[40,23],[43,20]];
+const TR=D;
+const GUESS={m:0.5,b:5}, BEST={m:0.95,b:-6.6};
+const TOP='#C27A95';
+const W={6:800,4:533,3:400,2:267,q:200};
+let UID=0;
+
+/* ============ text helpers ============ */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const rich=l=>esc(l===''?' ':l).replace(/\*\*(.+?)\*\*/g,'<tspan class="b">$1</tspan>');
+function TX(x,y,s,o={}){
+  const size=o.size||15, lh=o.lh||size*1.24, a=o.anchor||'middle';
+  const lines=String(s).split('|');
+  return `<text x="${x}" y="${y}" font-size="${size}" text-anchor="${a}" class="${o.cls||'lt'}"${o.fill?` fill="${o.fill}"`:''}${o.extra||''}>`+
+    lines.map((l,i)=>`<tspan x="${x}" dy="${i?lh:0}">${rich(l)}</tspan>`).join('')+`</text>`;
+}
+const B=(x,y,s,tx,ty,o={})=>`<g class="bub" data-k="${o.k||'s'}"${tx!=null?` data-tx="${tx}" data-ty="${ty}"`:''}>${TX(x,y,s,{size:o.size||15})}</g>`;
+const CAP=(x,y,s,o={})=>`<g class="cap">${TX(x,y,s,{size:o.size||13,anchor:'start'})}</g>`;
+const NOTE=(x,y,s,o={})=>{const ts=o.ts||16;return `<g class="note">${TX(x,y,o.title||"LINO'S NOTEBOOK",{size:ts,anchor:'start',cls:'nt'})}${TX(x,y+ts*1.35,s,{size:o.size||13,anchor:'start'})}</g>`};
+const SFX=(x,y,s,o={})=>`<text x="${x}" y="${y}" class="disp" font-size="${o.size||30}" text-anchor="middle" fill="${o.fill||K.coral}" stroke="${K.ink}" stroke-width="${o.sw||5}" paint-order="stroke" stroke-linejoin="round" transform="rotate(${o.rot||-8} ${x} ${y})">${esc(s)}</text>`;
+const OUT=(x,y,s,o={})=>`<text x="${x}" y="${y}" class="disp" font-size="${o.size||60}" text-anchor="${o.anchor||'middle'}" fill="${o.fill||K.white}" stroke="${K.ink}" stroke-width="${o.sw||8}" paint-order="stroke" stroke-linejoin="round"${o.rot?` transform="rotate(${o.rot} ${x} ${y})"`:''}${o.fit?` data-fit="${o.fit}"`:''}>${esc(s)}</text>`;
+const fmt=(v,d=1)=>{const r=Math.round(v*Math.pow(10,d))/Math.pow(10,d);if(Math.abs(r)<1e-9)return '0';return (r<0?'−':'+')+Math.abs(r).toFixed(d)};
+const fmtP=(v,d=1)=>{const s=Math.abs(v).toFixed(d);return (v<0?'−':'')+s};
+
+/* ============ scenery ============ */
+const R=(x,y,w,h,f,o='')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}" ${o}/>`;
+const bg=(w,h,c,dots=.5)=>R(0,0,w,h,c)+(dots?R(0,0,w,h,'url(#dots)',`opacity="${dots}"`):'');
+function sun(x,y,r){let s='';for(let i=0;i<12;i++){const a=i*Math.PI/6;s+=`<line x1="${x+Math.cos(a)*(r+6)}" y1="${y+Math.sin(a)*(r+6)}" x2="${x+Math.cos(a)*(r+18)}" y2="${y+Math.sin(a)*(r+18)}" stroke="${K.ink}" stroke-width="7" stroke-linecap="round"/><line x1="${x+Math.cos(a)*(r+6)}" y1="${y+Math.sin(a)*(r+6)}" x2="${x+Math.cos(a)*(r+18)}" y2="${y+Math.sin(a)*(r+18)}" stroke="${K.yellow}" stroke-width="3.5" stroke-linecap="round"/>`}
+  return s+`<circle cx="${x}" cy="${y}" r="${r}" fill="${K.yellow}" stroke="${K.ink}" stroke-width="3.5"/><circle cx="${x+r*.3}" cy="${y+r*.25}" r="${r*.62}" fill="url(#dotsC)" opacity=".55"/>`}
+function cloud(x,y,s=1,f=K.white){return `<g transform="translate(${x},${y}) scale(${s})"><path d="M-50,10 Q-62,-12 -36,-16 Q-30,-40 -4,-32 Q12,-50 32,-30 Q60,-30 54,-4 Q66,12 44,16 L-40,16 Q-56,18 -50,10Z" fill="${f}" stroke="${K.ink}" stroke-width="3"/></g>`}
+function house(x,y,w,h,c,roof){return R(x,y-h,w,h,c,`stroke="${K.ink}" stroke-width="3"`)+`<path d="M${x-8},${y-h} L${x+w/2},${y-h-w*.45} L${x+w+8},${y-h}Z" fill="${roof}" stroke="${K.ink}" stroke-width="3" stroke-linejoin="round"/>`+R(x+w*.22,y-h*.7,w*.22,h*.24,K.yellow2,`stroke="${K.ink}" stroke-width="2"`)+R(x+w*.58,y-h*.45,w*.22,h*.45,K.navy2,`stroke="${K.ink}" stroke-width="2"`)}
+function cup(x,y,s=1,full=true){return `<g transform="translate(${x},${y}) scale(${s})"><path d="M-8,-20 L8,-20 L6,0 L-6,0Z" fill="${K.white}" stroke="${K.ink}" stroke-width="2"/>${full?`<path d="M-7.3,-15 L7.3,-15 L6,0 L-6,0Z" fill="${K.yellow}" stroke="${K.ink}" stroke-width="1.5"/>`:''}</g>`}
+function pitcher(x,y,s=1,full=true,rot=0){return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})"><path d="M-14,-40 L14,-40 L16,0 L-16,0Z" fill="${K.white}" stroke="${K.ink}" stroke-width="2.5"/>${full?`<path d="M-15,-28 L15,-28 L16,0 L-16,0Z" fill="${K.yellow}"/><circle cx="-4" cy="-14" r="4" fill="${K.lemon}" stroke="${K.ink}" stroke-width="1.2"/>`:''}<path d="M14,-34 Q28,-30 16,-12" fill="none" stroke="${K.ink}" stroke-width="4"/><path d="M-16,0 L16,0" stroke="${K.ink}" stroke-width="2.5"/></g>`}
+function stand(x,y,s=1,items=''){
+  let aw='';for(let i=0;i<8;i++)aw+=R(-100+i*25,-182,25,26,i%2?K.white:K.yellow,`stroke="${K.ink}" stroke-width="2"`)+`<circle cx="${-87.5+i*25}" cy="-156" r="12.5" fill="${i%2?K.white:K.yellow}" stroke="${K.ink}" stroke-width="2"/>`;
+  return `<g transform="translate(${x},${y}) scale(${s})">`+R(-88,-158,7,90,K.white,`stroke="${K.ink}" stroke-width="2.5"`)+R(81,-158,7,90,K.white,`stroke="${K.ink}" stroke-width="2.5"`)+aw+R(-100,-182,200,13,K.coral,`stroke="${K.ink}" stroke-width="2.5"`)+
+  R(-96,-76,192,9,K.white,`stroke="${K.ink}" stroke-width="2.5"`)+R(-90,-68,180,68,K.coral,`stroke="${K.ink}" stroke-width="3"`)+R(-90,-68,180,68,'url(#dots)','opacity=".35"')+
+  `<text x="0" y="-26" class="disp" font-size="30" text-anchor="middle" fill="${K.yellow}" stroke="${K.ink}" stroke-width="5" paint-order="stroke">LEMONADE</text><text x="0" y="-8" class="disp" font-size="14" text-anchor="middle" fill="${K.white}">FRESH · COLD · 50¢</text>`+items+`</g>`;
+}
+function person(x,y,s=1,o={}){const c=o.c||K.navy2,sk=o.sk||K.skin2,f=o.flip?-1:1,mood=o.mood||'happy';
+  const mouth=mood==='sad'?'M-5,-70 Q0,-75 5,-70':mood==='wow'?'':'M-6,-73 Q0,-66 6,-73';
+  return `<g transform="translate(${x},${y}) scale(${f*s},${s})"><path d="M-6,-16 L-7,-2 M6,-16 L7,-2" stroke="${K.ink}" stroke-width="7" stroke-linecap="round"/>`+
+  `<path d="M-15,-58 Q0,-64 15,-58 L17,-14 L-17,-14Z" fill="${c}" stroke="${K.ink}" stroke-width="2.5"/>`+(o.reach?`<path d="M14,-52 Q30,-56 38,-62" stroke="${K.ink}" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M14,-52 Q30,-56 38,-62" stroke="${sk}" stroke-width="3.5" stroke-linecap="round" fill="none"/>`:'')+
+  `<circle cx="0" cy="-77" r="14" fill="${sk}" stroke="${K.ink}" stroke-width="2.5"/>${o.hat?`<path d="M-15,-82 Q0,-102 15,-82Z" fill="${o.hat}" stroke="${K.ink}" stroke-width="2"/>`:`<path d="M-14,-80 Q-12,-94 0,-93 Q12,-94 14,-80 Q4,-88 -14,-80Z" fill="${o.hair||K.hair}"/>`}`+
+  `<circle cx="-5" cy="-78" r="2" fill="${K.ink}"/><circle cx="5" cy="-78" r="2" fill="${K.ink}"/>`+(mood==='wow'?`<ellipse cx="0" cy="-70" rx="3" ry="4" fill="${K.ink}"/>`:`<path d="${mouth}" fill="none" stroke="${K.ink}" stroke-width="2"/>`)+`</g>`}
+
+/* ============ characters ============ */
+const ARMS_M={down:['M-21,-80 Q-30,-66 -30,-52','M21,-80 Q30,-66 30,-52'],up:['M-21,-82 Q-34,-98 -38,-118','M21,-82 Q34,-98 38,-118'],
+  point:['M-21,-80 Q-30,-66 -30,-52','M21,-82 Q38,-88 56,-94'],hips:['M-21,-80 Q-42,-70 -24,-56','M21,-80 Q42,-70 24,-56'],
+  hold:['M-21,-80 Q-28,-62 -12,-62','M21,-80 Q28,-62 12,-62'],wave:['M-21,-80 Q-30,-66 -30,-52','M21,-82 Q42,-96 40,-120'],
+  chin:['M-21,-80 Q-30,-66 -30,-52','M21,-80 Q36,-80 12,-98']};
+const end=d=>{const n=d.match(/-?\d+(\.\d+)?/g).map(Number);return [n[n.length-2],n[n.length-1]]};
+function limb(d,c,w=12){return `<path d="${d}" fill="none" stroke="${K.ink}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w-5.5}" stroke-linecap="round" stroke-linejoin="round"/>`}
+function maya(x,y,s=1,o={}){
+  const m=o.mood||'happy', f=o.flip?-1:1, sk=K.skin, ink=K.ink, arms=ARMS_M[o.arms||'down'];
+  let face='';
+  const eyes={
+    happy:`<path d="M-15,-115 q5,-7 10,0 M5,-115 q5,-7 10,0" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`,
+    normal:`<ellipse cx="-10" cy="-117" rx="3.6" ry="5" fill="${ink}"/><ellipse cx="10" cy="-117" rx="3.6" ry="5" fill="${ink}"/>`,
+    shocked:`<circle cx="-10" cy="-118" r="6.5" fill="#fff" stroke="${ink}" stroke-width="2"/><circle cx="10" cy="-118" r="6.5" fill="#fff" stroke="${ink}" stroke-width="2"/><circle cx="-10" cy="-118" r="2.6" fill="${ink}"/><circle cx="10" cy="-118" r="2.6" fill="${ink}"/><path d="M-17,-130 q7,-5 13,-2 M4,-132 q7,-3 13,2" stroke="${ink}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    think:`<ellipse cx="-10" cy="-118" rx="3.6" ry="5" fill="${ink}"/><ellipse cx="10" cy="-118" rx="3.6" ry="5" fill="${ink}"/><circle cx="-9" cy="-120" r="1.4" fill="#fff"/><circle cx="11" cy="-120" r="1.4" fill="#fff"/><path d="M4,-130 q7,-6 13,-1" stroke="${ink}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    sad:`<ellipse cx="-10" cy="-116" rx="3.4" ry="4.5" fill="${ink}"/><ellipse cx="10" cy="-116" rx="3.4" ry="4.5" fill="${ink}"/><path d="M-16,-124 L-5,-127 M5,-127 L16,-124" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`,
+    det:`<ellipse cx="-10" cy="-116" rx="3.6" ry="4.6" fill="${ink}"/><ellipse cx="10" cy="-116" rx="3.6" ry="4.6" fill="${ink}"/><path d="M-17,-128 L-5,-123 M5,-123 L17,-128" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`};
+  const mouths={happy:`<path d="M-10,-105 Q0,-92 10,-105Z" fill="#7A1F2B" stroke="${ink}" stroke-width="2.2" stroke-linejoin="round"/>`,
+    normal:`<path d="M-7,-104 Q0,-98 7,-104" fill="none" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`,
+    shocked:`<ellipse cx="0" cy="-101" rx="5.5" ry="7" fill="#7A1F2B" stroke="${ink}" stroke-width="2.2"/>`,
+    think:`<path d="M-3,-102 L8,-104" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`,
+    sad:`<path d="M-7,-99 Q0,-105 7,-99" fill="none" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`,
+    det:`<path d="M-7,-103 Q1,-100 8,-104" fill="none" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`};
+  const ek={happy:'happy',smile:'normal',shocked:'shocked',think:'think',sad:'sad',det:'det'}[m]||'normal';
+  const mk={happy:'happy',smile:'normal',shocked:'shocked',think:'think',sad:'sad',det:'det'}[m]||'normal';
+  face=eyes[ek]+mouths[mk]+`<circle cx="-15" cy="-107" r="4.5" fill="${K.coral}" opacity=".4"/><circle cx="15" cy="-107" r="4.5" fill="${K.coral}" opacity=".4"/>`;
+  const [h1x,h1y]=end(arms[0]),[h2x,h2y]=end(arms[1]);
+  return `<g transform="translate(${x},${y}) scale(${f*s},${s})">`+
+   `<path d="M0,-150 C-30,-150 -40,-130 -39,-110 C-38,-92 -47,-80 -43,-64 C-39,-52 -49,-44 -41,-33 Q-31,-27 -23,-40 L23,-40 Q31,-27 41,-33 C49,-44 39,-52 43,-64 C47,-80 38,-92 39,-110 C40,-130 30,-150 0,-150Z" fill="${K.hair}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>`+
+   `<path d="M-37,-92 q5,9 0,18 q-4,8 1,16 M37,-92 q-5,9 0,18 q4,8 -1,16" fill="none" stroke="#4A3A66" stroke-width="2" stroke-linecap="round"/>`+
+   limb('M-9,-46 L-10,-6',K.navy)+limb('M9,-46 L10,-6',K.navy)+
+   `<ellipse cx="-12" cy="-3" rx="11" ry="6" fill="${K.white}" stroke="${ink}" stroke-width="2.5"/><ellipse cx="12" cy="-3" rx="11" ry="6" fill="${K.white}" stroke="${ink}" stroke-width="2.5"/><path d="M-19,-3 L-6,-3 M5,-3 L18,-3" stroke="${K.coral}" stroke-width="2"/>`+
+   `<path d="M-22,-52 L22,-52 L20,-36 L-20,-36Z" fill="${K.navy}" stroke="${ink}" stroke-width="2.5" stroke-linejoin="round"/>`+
+   R(-5,-94,10,9,sk,`stroke="${ink}" stroke-width="2"`)+
+   `<path d="M-22,-85 Q0,-91 22,-85 L24,-45 Q0,-41 -24,-45Z" fill="${TOP}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/><path d="M8,-86 Q22,-84 23,-58 L24,-45 Q16,-43 10,-43Z" fill="url(#dots)" opacity=".45"/>`+
+   [[-14,-78],[7,-75],[-4,-64],[13,-60],[-15,-55],[2,-82],[17,-71],[-8,-50],[9,-50]].map(([a,b])=>`<circle cx="${a}" cy="${b}" r="1.4" fill="${K.yellow2}"/>`).join('')+
+   `<circle cx="0" cy="-118" r="28" fill="${sk}" stroke="${ink}" stroke-width="3"/>`+
+   `<path d="M-29,-112 C-33,-153 33,-153 29,-112 C26,-134 12,-143 2,-142 L0,-133 L-2,-142 C-12,-143 -26,-134 -29,-112Z" fill="${K.hair}" stroke="${ink}" stroke-width="2" stroke-linejoin="round"/>`+
+   face+
+   `<path d="M-27,-124 C-36,-100 -25,-88 -29,-70 C-32,-58 -23,-52 -28,-41 Q-20,-43 -17,-50 C-14,-62 -23,-74 -19,-90 C-16,-104 -21,-114 -19,-126Z" fill="${K.hair}" stroke="${ink}" stroke-width="2" stroke-linejoin="round"/>`+
+   `<path d="M27,-124 C36,-100 25,-88 29,-70 C32,-58 23,-52 28,-41 Q20,-43 17,-50 C14,-62 23,-74 19,-90 C16,-104 21,-114 19,-126Z" fill="${K.hair}" stroke="${ink}" stroke-width="2" stroke-linejoin="round"/>`+
+   limb(arms[0],TOP,11)+limb(arms[1],TOP,11)+`<circle cx="${h1x}" cy="${h1y}" r="5.5" fill="${sk}" stroke="${ink}" stroke-width="2.5"/><circle cx="${h2x}" cy="${h2y}" r="5.5" fill="${sk}" stroke="${ink}" stroke-width="2.5"/>`+
+   `</g>`;
+}
+
+const ARMS_L={down:['M-31,-56 Q-44,-44 -42,-30','M31,-56 Q44,-44 42,-30'],up:['M-31,-62 Q-46,-80 -44,-104','M31,-62 Q46,-80 44,-104'],
+  point:['M-31,-56 Q-44,-44 -42,-30','M31,-60 Q50,-66 62,-74'],hold:['M-31,-56 Q-40,-36 -18,-36','M31,-56 Q40,-36 18,-36'],
+  wave:['M-31,-56 Q-44,-44 -42,-30','M31,-62 Q50,-80 46,-104']};
+function lino(x,y,s=1,o={}){
+  const face=o.face||'^_^', f=o.flip?-1:1, ink=K.ink, arms=ARMS_L[o.arms||'down'];
+  let keys='';const kc=[K.tint,K.tint,K.tint,K.coral,K.tint,K.tint,K.tint,K.yellow,K.tint,K.tint,K.tint,K.lemon];
+  for(let r=0;r<3;r++)for(let c=0;c<4;c++){const i=r*4+c,kx=-23+c*12,ky=-58+r*12;keys+=`<rect x="${kx}" y="${ky}" width="10" height="8" rx="2" fill="${kc[i]}" stroke="${ink}" stroke-width="1.5"${i===6?` transform="rotate(18 ${kx+5} ${ky+4})"`:''}/>`}
+  const [h1x,h1y]=end(arms[0]),[h2x,h2y]=end(arms[1]);
+  const faceTxt=`<text x="0" y="-74" class="lcd" font-size="${face.length>3?17:22}" text-anchor="middle" transform="scale(${f},1)">${esc(face)}</text>`;
+  return `<g transform="translate(${x},${y}) scale(${f*s},${s})">`+
+   `<path d="M-14,-14 L-16,-4 M14,-14 L16,-4" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`+
+   R(-28,-7,22,8,K.navy,`rx="4" stroke="${ink}" stroke-width="2"`)+R(6,-7,22,8,K.navy,`rx="4" stroke="${ink}" stroke-width="2"`)+
+   `<path d="${arms[0]}" fill="none" stroke="${ink}" stroke-width="4.5" stroke-linecap="round"/><path d="${arms[1]}" fill="none" stroke="${ink}" stroke-width="4.5" stroke-linecap="round"/>`+
+   `<circle cx="${h1x}" cy="${h1y}" r="5.5" fill="${K.yellow}" stroke="${ink}" stroke-width="2"/><circle cx="${h2x}" cy="${h2y}" r="5.5" fill="${K.yellow}" stroke="${ink}" stroke-width="2"/>`+
+   `<line x1="9" y1="-104" x2="14" y2="-122" stroke="${ink}" stroke-width="3"/><circle cx="14" cy="-126" r="5.5" fill="${K.yellow}" stroke="${ink}" stroke-width="2"/>`+
+   R(-32,-105,64,92,'#EEF2FF',`rx="12" stroke="${ink}" stroke-width="3.5"`)+R(16,-103,14,88,'url(#dots)','rx="8" opacity=".5"')+
+   R(-25,-97,50,31,K.navy,`rx="5" stroke="${ink}" stroke-width="2.5"`)+R(-23,-95,46,8,'#FFFFFF','rx="3" opacity=".12"')+faceTxt+keys+
+   `<g transform="rotate(-30 22 -24)">${R(13,-27,18,7,K.coral2,`rx="2" stroke="${ink}" stroke-width="1.5"`)}<circle cx="20" cy="-23.5" r=".9" fill="${ink}"/><circle cx="24" cy="-23.5" r=".9" fill="${ink}"/></g>`+
+   `</g>`;
+}
+
+/* ============ charts ============ */
+function zig(x,ya,yb){const n=Math.max(4,Math.round(Math.abs(yb-ya)/6));let d=`M${x},${ya}`;for(let i=1;i<n;i++){d+=` L${x+(i%2?5:-5)},${ya+(yb-ya)*i/n}`}return d+` L${x},${yb}`}
+function chart(o){
+  const {x,y,w,h,x0,x1,y0,y1}=o, board=o.theme==='board';
+  const sx=v=>x+(v-x0)/(x1-x0)*w, sy=v=>y+h-(v-y0)/(y1-y0)*h;
+  const fg=board?K.chalk:K.ink, gc=board?'rgba(244,247,255,.16)':'#E3E9FF', id='cl'+(UID++);
+  const pl=o.padL??48,pr=o.padR??20,pt=o.padT??16,pb=o.padB??48;
+  let s='';
+  if(o.frame!==false){const fx=x-pl,fy=y-pt,fw=w+pl+pr,fh=h+pt+pb;
+    s+=board?R(fx-6,fy-6,fw+12,fh+12,K.yellow,`rx="8" stroke="${K.ink}" stroke-width="3"`)+R(fx,fy,fw,fh,K.board,`rx="4" stroke="${K.ink}" stroke-width="2.5"`)+R(fx,fy,fw,fh,'url(#dotsW)','opacity=".35"')
+      :R(fx,fy,fw,fh,K.white,`rx="4" stroke="${K.ink}" stroke-width="2.5"`)}
+  (o.xt||[]).forEach(v=>{s+=`<line x1="${sx(v)}" y1="${y}" x2="${sx(v)}" y2="${y+h}" stroke="${gc}" stroke-width="1.5"/>`+`<text x="${sx(v)}" y="${y+h+16}" font-size="11.5" text-anchor="middle" fill="${fg}">${fmtP(v,0)}</text>`});
+  (o.yt||[]).forEach(v=>{s+=`<line x1="${x}" y1="${sy(v)}" x2="${x+w}" y2="${sy(v)}" stroke="${gc}" stroke-width="1.5"/>`+`<text x="${x-7}" y="${sy(v)+4}" font-size="11.5" text-anchor="end" fill="${fg}">${o.ytf?o.ytf(v):fmtP(v,0)}</text>`});
+  if(o.under)s+=o.under(sx,sy);
+  s+=`<path d="M${x},${y-4} L${x},${y+h} L${x+w+4},${y+h}" fill="none" stroke="${fg}" stroke-width="2.5"/>`;
+  if(y0<0)s+=`<line x1="${x}" y1="${sy(0)}" x2="${x+w}" y2="${sy(0)}" stroke="${fg}" stroke-width="2"/>`;
+  if(o.xl)s+=`<text x="${x+w/2}" y="${y+h+(o.xlo||36)}" font-size="13" font-weight="700" text-anchor="middle" fill="${fg}">${esc(o.xl)}</text>`;
+  if(o.yl)s+=`<text x="${x-(o.ylo||34)}" y="${y+h/2}" font-size="13" font-weight="700" text-anchor="middle" fill="${fg}" transform="rotate(-90 ${x-(o.ylo||34)} ${y+h/2})">${esc(o.yl)}</text>`;
+  s+=`<clipPath id="${id}"><rect x="${x}" y="${y}" width="${w}" height="${h}"/></clipPath><g clip-path="url(#${id})">`;
+  (o.lines||[]).forEach(l=>{s+=`<line x1="${sx(x0)}" y1="${sy(l.m*x0+l.b)}" x2="${sx(x1)}" y2="${sy(l.m*x1+l.b)}" stroke="${l.c||K.line}" stroke-width="${l.w||4.5}" stroke-linecap="round"${l.dash?` stroke-dasharray="${l.dash}"`:''} opacity="${l.op??1}"/>`});
+  (o.curves||[]).forEach(cv=>{let d='';const n=480,lo=y0-(y1-y0)*2,hi=y1+(y1-y0)*2;for(let i=0;i<=n;i++){const xv=x0+(x1-x0)*i/n;const yv=Math.max(lo,Math.min(hi,cv.f(xv)));d+=(i?' L':'M')+sx(xv).toFixed(1)+','+sy(yv).toFixed(1)}
+    s+=`<path d="${d}" fill="none" stroke="${cv.c||K.line}" stroke-width="${cv.w||4.5}" stroke-linecap="round" stroke-linejoin="round"${cv.dash?` stroke-dasharray="${cv.dash}"`:''} opacity="${cv.op??1}"/>`});
+  s+='</g>';
+  const pts=o.pts||D;
+  if(o.resid){const r=o.resid;pts.forEach(([px,py])=>{const yh=r.f?r.f(px):r.m*px+r.b;if(Math.abs(py-yh)>0.05)s+=`<path d="${zig(sx(px),sy(py),sy(yh))}" fill="none" stroke="${K.coral}" stroke-width="2.6" stroke-linejoin="round"/>`;
+    if(r.lab){const v=py-yh;const z=Math.abs(v)<0.05;s+=`<text x="${sx(px)+(z?4:(r.dx||12))}" y="${(sy(py)+sy(yh))/2+(z?-12:5)}" font-size="${r.size||14}" font-weight="700" fill="${board?K.yellow:K.coral}" stroke="${board?K.board:K.white}" stroke-width="3" paint-order="stroke">${fmt(v,r.d??0)}</text>`}})}
+  if(o.hats){const r=o.hats;pts.forEach(([px])=>{const yh=r.f?r.f(px):r.m*px+r.b;s+=`<circle cx="${sx(px)}" cy="${sy(yh)}" r="5.5" fill="${K.white}" stroke="${K.line}" stroke-width="3"/>`;
+    if(r.lab)s+=`<text x="${sx(px)}" y="${sy(yh)-11}" font-size="13" font-weight="700" text-anchor="middle" fill="${K.ink}" stroke="${K.white}" stroke-width="3" paint-order="stroke">${fmtP(yh,r.d??0)}</text>`})}
+  if(o.dots!==false)pts.forEach(([px,py])=>{s+=`<circle cx="${sx(px)}" cy="${sy(py)}" r="${o.r||6.5}" fill="${board?K.yellow:K.navy}" stroke="${board?K.ink:K.white}" stroke-width="2"/>`});
+  if(o.over)s+=o.over(sx,sy);
+  return s;
+}
+function land(f,x0,x1,bottom,fill=K.yellow2){let d=`M${x0},${bottom}`;for(let x=x0;x<=x1;x+=5)d+=` L${x},${f(x).toFixed(1)}`;d+=` L${x1},${bottom}Z`;
+  let e=`M${x0},${f(x0).toFixed(1)}`;for(let x=x0;x<=x1;x+=5)e+=` L${x},${f(x).toFixed(1)}`;
+  return `<path d="${d}" fill="${fill}"/><path d="${d}" fill="url(#dots)" opacity=".4"/><path d="${e}" fill="none" stroke="${K.ink}" stroke-width="4" stroke-linejoin="round"/>`}
+function fit(pts){const n=pts.length,mx=pts.reduce((a,p)=>a+p[0],0)/n,my=pts.reduce((a,p)=>a+p[1],0)/n;let sxy=0,sxx=0;pts.forEach(([x,y])=>{sxy+=(x-mx)*(y-my);sxx+=(x-mx)**2});const m=sxy/sxx;return {m,b:my-m*mx}}
+function mse(pts,m,b){return pts.reduce((a,[x,y])=>a+(y-(m*x+b))**2,0)/pts.length}
+
+/* ============ panel & page builders ============ */
+const P=(span,h,body)=>({span,h,body});
+function recap(span,h,text){const w=W[span];
+  return P(span,h,bg(w,h,K.yellow,.4)+NOTE(22,40,text,{title:'WHAT WE LEARNED',size:span===6?16:14,ts:20})+maya(w-58,h-12,span===6?.85:.8,{mood:'happy',arms:'hips'}))}
+function chTitle(n,title,tag,c,art=''){return {cls:'title',panels:[P(6,250,bg(800,250,c,.45)+art+
+  `<text x="40" y="72" class="disp" font-size="30" fill="${K.ink}" letter-spacing="3">CHAPTER ${n}</text>`+OUT(40,150,title,{anchor:'start',size:62,fit:510})+TX(42,198,tag,{anchor:'start',size:19}))],id:'ch'+n}}
+
+/* ============ ISSUE #11 data (verified in python; same math below) ============ */
+const NN={"R": [[4, 2, 6.0], [1, 1, 9.5], [1, 2, 6.5], [1, 3, 6.0], [1, 4, 4.5], [1, 5, 3.0], [1, 6, 1.5], [2, 1, 7.0], [2, 2, 9.0], [2, 3, 7.0], [2, 4, 7.0], [2, 5, 4.5], [2, 6, 3.0], [3, 1, 6.0], [3, 2, 7.5], [3, 3, 8.5], [3, 4, 7.5], [3, 5, 6.0], [3, 6, 4.5], [4, 1, 5.0], [4, 3, 7.5], [4, 4, 9.5], [4, 5, 7.5], [4, 6, 6.0], [5, 1, 3.0], [5, 2, 4.5], [5, 3, 6.5], [5, 4, 7.5], [5, 5, 9.0], [5, 6, 8.0], [6, 1, 1.0], [6, 2, 3.0], [6, 3, 5.0], [6, 4, 6.0], [6, 5, 7.5], [6, 6, 9.0]], "p0": {"a": [1.0, 1.0, 0.5], "b": [1.0, 1.0, -1.0], "v": [1.0, 0.5], "c": 0.0}, "lr": 0.005, "hist": [36.541666666666664, 8.293690878466048, 8.294526994045915, 8.385246046237619, 8.460630143983623, 8.456507371319859, 8.370716592595407, 8.228881213401754, 8.055864971663745, 7.868174752369748, 7.675596536713426, 7.4839474716279994, 7.29687698889125, 7.1163937548867295, 6.946439132370137, 6.788533438095591, 6.64262166452882, 6.508420251588616, 6.386035163694174, 6.275174826073313, 6.174778503311339, 6.083771150201849, 6.001084483158879, 5.925137893116561, 5.854000106788572, 5.78437989231667, 5.7177322784408755, 5.65541966474124, 5.596450327462245, 5.537408838999614, 5.477143497826793, 5.412046984101696, 5.341973537450661, 5.268322707370984, 5.183604549485591, 5.08231809261146, 4.941289957152856, 4.7864428028006625, 4.616105546606006, 4.403226454397067, 4.136075785506816, 3.657911887343511, 3.3203422119641037, 2.9861729455406043, 2.6343215895905545, 2.285163539293941, 1.9580586831086069, 1.6673992309577612, 1.4216219386510578, 1.2242960132132683, 1.075260009125052, 0.9394764601002871, 0.8280658355791624, 0.7906345082948935, 0.705758033286623, 0.6348035373175734, 0.5749304428212263, 0.5314465093221687, 0.5070237886314704, 0.49730696760413795, 0.496482207891755, 0.5005327440210684, 0.5060092135856279, 0.510967563056934, 0.5145057273087433, 0.5163312943554019, 0.5164743845234472, 0.515117971580204, 0.5125013928198632, 0.5088676153438089, 0.5044369564848077, 0.4993965578785813, 0.493898722316166, 0.48806374943061903, 0.4819846440956517, 0.47573222504245294, 0.46935988610419294, 0.3259438914451442, 0.2969427139068692, 0.4434429109924685, 0.31410658670961467, 0.28079661091043884, 0.4294367237760172, 0.30347727619115666, 0.2671013905606823, 0.41372620767717555, 0.4203064099032654, 0.4143640710477903, 0.4071863783815506, 0.4000188045938288, 0.3929798448921899, 0.38607969818645593, 0.3793178216268684, 0.37269289673275785, 0.3662037888959472, 0.3598495679711269, 0.3536294407064096, 0.34754268646179826, 0.34158860478227226, 0.3357664741762351, 0.3300755205489294, 0.32451489380076026, 0.3190836512685091, 0.313780746852056, 0.3086050248206237, 0.30355521742797315, 0.29862994558677713, 0.29382772195999557, 0.28914695592039596, 0.28458595991495494, 0.2801429568426881, 0.2758160881193212, 0.2716034221588551, 0.2675029630498039, 0.26351265924699846, 0.25963041213522625, 0.25585408435270973, 0.2521815077884073, 0.24861049118913092, 0.18694824368792504, 0.17687947731706216, 0.22209111095062545, 0.18105847554697765, 0.17313160940408287, 0.21599564740206192, 0.1773130020266908, 0.1698461517401001, 0.20990569238709542, 0.17366652371573185, 0.1667582439567085, 0.20391935437178874, 0.17020909566815706, 0.16387973774725018, 0.19816835666843902, 0.16699586151614637, 0.16121468255832788, 0.19242075792970179, 0.1640516556156243, 0.15876115261694468, 0.1870010598486406, 0.16138302318124043, 0.15651343690280206, 0.18195488779484656, 0.15898560416017019, 0.15446340534858585, 0.17728039826743747, 0.1568486556359926, 0.15260142096732313, 0.17296704910582322, 0.15495785574657892, 0.15091697713299146, 0.16899914693417467, 0.1532970646133627, 0.14939915262243156, 0.16535813344612177, 0.15184943998388717, 0.14803693797773962, 0.16202407417445608, 0.15054797149429097, 0.1468194674992757, 0.15897663067354695, 0.1493097968433097, 0.1457361806700854, 0.149171257737865, 0.14498805136519205, 0.14877571865367412, 0.1443259071795771, 0.14833860071526406, 0.1437062794874734, 0.1479530221713288, 0.14313011504555184, 0.14762417813154882, 0.1425973014226829, 0.14734966484146134, 0.14210702101828016, 0.14712628192411506, 0.1416579578499395, 0.1469507019388354, 0.14124849160495642, 0.14681961505641458, 0.14087682887626482, 0.1467297995680824, 0.14054109189867622, 0.14667816264422645, 0.14023937797258954, 0.1466617623331656, 0.1399697986665059, 0.14667781731900462, 0.1397305051945189, 0.14672370892711717, 0.13951970440961647, 0.14679697839883807, 0.13933566845549042, 0.14689532140738673, 0.1391767401439313, 0.14701658107019588, 0.13904133545647718, 0.1471587402405908, 0.1389279441161625, 0.14731991355836255, 0.13883512887073665, 0.14749833954756203, 0.13876152392421728, 0.14769237293089182, 0.13870583281651178, 0.1479004772567445, 0.1386668259581185, 0.14809858806535045, 0.13864333796414507, 0.1483092338222613, 0.1386342648885242, 0.14853194868906164, 0.13863856142940334, 0.14876546242690267, 0.13865523815542713, 0.1490085859626561, 0.1386833587875928, 0.14926020641527044, 0.13872203756029997, 0.14951928241011117, 0.13877043667724268, 0.14978483967568818, 0.13882776387191278, 0.15005596691411338, 0.13889327007799496, 0.15033181193439457, 0.13896624721181047, 0.1506115780360569, 0.1390460260664963, 0.15089452062987058, 0.13913197431589935, 0.1511799440817915, 0.13922349462501651, 0.15146719876627188, 0.13932002286284403, 0.15175567831526618, 0.13943229344588107, 0.15204481704945874, 0.13959519203690535, 0.15233408757901892, 0.13976098805755843, 0.15262299856159797, 0.13992922233319877, 0.15291109260609145, 0.1400994625845259, 0.15319794431129918, 0.1402713020746786, 0.1534831584294958, 0.1404443583302188, 0.1537663681454705, 0.14061827193122198, 0.15404723346246052, 0.1407927053660575, 0.1543254396869701, 0.1409673419465725, 0.1546006960051007, 0.1411418847798398, 0.1548727341437578, 0.14131605579281226, 0.15514130711050006, 0.1414895948065305, 0.1554061880063524, 0.14166225865673404, 0.15566716890648472, 0.14183382035804087, 0.15592405980396606, 0.14200406830903203, 0.15617668761231482, 0.1421728055357852, 0.1564248952228069, 0.14233984897158664, 0.1566685406130194, 0.14250502877079374, 0.1569074960031902, 0.14266818765479983, 0.1571416470573932, 0.14282918028850639, 0.15737089212671376, 0.14298787268546642, 0.15759514153187942, 0.14314414164032901, 0.1578143168828941, 0.14329787418701867, 0.15802835043362873, 0.1434489670815167, 0.15823718446917093, 0.14359732630782723, 0.1584407707242666, 0.14374286660613259, 0.1586390698309194, 0.14388551102198804, 0.1588320507937267, 0.1440251904756057, 0.15903124652683556, 0.14416184335025828, 0.1592535393135678, 0.14429541509892618, 0.1594698420165605, 0.14442585786840112, 0.15968015660735685, 0.14455313014000504]};
+const RC=NN.R, P0=NN.p0, LR=NN.lr, HIST=NN.hist;
+const clone=p=>JSON.parse(JSON.stringify(p));
+function fwd(p,L,S){const za=p.a[0]*L+p.a[1]*S+p.a[2],zb=p.b[0]*L+p.b[1]*S+p.b[2],A=Math.max(0,za),B=Math.max(0,zb);return {za,zb,A,B,y:p.v[0]*A+p.v[1]*B+p.c}}
+function bstep(p,L,S,t,lr){const f=fwd(p,L,S),e=f.y-t,ba=e*p.v[0]*(f.za>0?1:0),bb=e*p.v[1]*(f.zb>0?1:0);
+  const q={a:[p.a[0]-lr*ba*L,p.a[1]-lr*ba*S,p.a[2]-lr*ba],b:[p.b[0]-lr*bb*L,p.b[1]-lr*bb*S,p.b[2]-lr*bb],v:[p.v[0]-lr*e*f.A,p.v[1]-lr*e*f.B],c:p.c-lr*e};
+  return {q,f,e,ba,bb}}
+const mseP=p=>RC.reduce((s,[L,S,t])=>s+(fwd(p,L,S).y-t)**2,0)/RC.length;
+function trainP(p,rounds){p=clone(p);for(let r=0;r<rounds;r++)for(const [L,S,t] of RC)p=bstep(p,L,S,t,LR).q;return p}
+const PT=trainP(P0,300);
+const LINE=[0.03333333,0.03333333,5.87777778];
+const f2=v=>(Math.round(v*100)/100).toFixed(2).replace(/\.?0+$/,'')||'0';
+const sgn=v=>(v<0?'−':'')+f2(Math.abs(v));
+const legend=(x,y,items)=>`<g transform="translate(${x},${y})">${R(0,0,items.w||170,items.length*21+10,K.white,`stroke="${K.ink}" stroke-width="2"`)}`+items.map((it,i)=>{const yy=17+i*21;
+  const mk=it.k==='dot'?`<circle cx="16" cy="${yy-4}" r="5.5" fill="${K.navy}"/>`:it.k==='dia'?`<path d="M16,${yy-11} L23,${yy-4} L16,${yy+3} L9,${yy-4}Z" fill="${K.coral}" stroke="${K.ink}" stroke-width="1.5"/>`:`<line x1="6" y1="${yy-4}" x2="26" y2="${yy-4}" stroke="${it.c}" stroke-width="4"${it.dash?` stroke-dasharray="${it.dash}"`:''}/>`;
+  return mk+`<text x="34" y="${yy}" font-size="12.5">${esc(it.t)}</text>`}).join('')+`</g>`;
+function recapX(span,h,text,o={}){const w=W[span];return P(span,h,bg(w,h,o.c||K.yellow,.4)+NOTE(22,40,text,{title:'WHAT WE LEARNED',size:span===6?16:14,ts:20})+(o.extra||'')+maya(w-58,h-12,span===6?.85:.8,{mood:o.mood||'happy',arms:o.arms||'hips'}))}
+function spark(x,y,r,c=K.yellow){let d='';for(let i=0;i<16;i++){const a=i*Math.PI/8,rr=i%2?r*.38:r;d+=(i?' L':'M')+(x+Math.cos(a)*rr).toFixed(1)+','+(y+Math.sin(a)*rr).toFixed(1)}return `<path d="${d}Z" fill="${c}" stroke="${K.ink}" stroke-width="2" stroke-linejoin="round"/>`}
+function knob(x,y,r,val,label){const a=(-225+val/8*270)*Math.PI/180;let t='';for(let i=0;i<=8;i++){const b=(-225+i/8*270)*Math.PI/180;t+=`<line x1="${x+Math.cos(b)*(r+4)}" y1="${y+Math.sin(b)*(r+4)}" x2="${x+Math.cos(b)*(r+10)}" y2="${y+Math.sin(b)*(r+10)}" stroke="${K.ink}" stroke-width="2.5"/>`}
+  return t+`<circle cx="${x}" cy="${y}" r="${r}" fill="${K.yellow}" stroke="${K.ink}" stroke-width="3"/><circle cx="${x}" cy="${y}" r="${r}" fill="url(#dots)" opacity=".35"/><line x1="${x}" y1="${y}" x2="${x+Math.cos(a)*r*.82}" y2="${y+Math.sin(a)*r*.82}" stroke="${K.ink}" stroke-width="5" stroke-linecap="round"/>`+(label?`<text x="${x}" y="${y+r+26}" class="disp" font-size="${Math.max(13,r*.6)}" text-anchor="middle">${esc(label)}</text>`:'')}
+function therm(x,y,s,lv){return `<g transform="translate(${x},${y}) scale(${s})"><rect x="-10" y="-120" width="20" height="110" rx="10" fill="${K.white}" stroke="${K.ink}" stroke-width="3.5"/><circle cy="-6" r="18" fill="${K.coral}" stroke="${K.ink}" stroke-width="3.5"/><rect x="-5" y="${-14-lv}" width="10" height="${lv}" fill="${K.coral}"/>${[0,1,2,3,4].map(i=>`<line x1="10" y1="${-105+i*18}" x2="18" y2="${-105+i*18}" stroke="${K.ink}" stroke-width="2.5"/>`).join('')}</g>`}
+function crow(x,y,s,f=1){return `<g transform="translate(${x},${y}) scale(${f*s},${s})"><path d="M-40,-6 L-70,-20 L-62,-2 L-74,6 L-40,8Z" fill="${K.hair}" stroke="${K.ink}" stroke-width="2.5" stroke-linejoin="round"/><ellipse cx="-6" cy="-6" rx="40" ry="26" fill="${K.hair}" stroke="${K.ink}" stroke-width="3"/><path d="M-20,-16 Q0,-2 18,-14" fill="none" stroke="#4A3A66" stroke-width="3"/><circle cx="30" cy="-34" r="20" fill="${K.hair}" stroke="${K.ink}" stroke-width="3"/><path d="M46,-40 L72,-32 L46,-26Z" fill="${K.yellow}" stroke="${K.ink}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="36" cy="-40" r="7" fill="${K.white}" stroke="${K.ink}" stroke-width="2"/><circle cx="38" cy="-39" r="3" fill="${K.ink}"/><path d="M26,-50 L44,-46" stroke="${K.ink}" stroke-width="3" stroke-linecap="round"/><path d="M-8,18 L-10,34 M8,18 L10,34 M-16,34 L-4,34 M2,34 L16,34" stroke="${K.yellow}" stroke-width="3.5" stroke-linecap="round"/></g>`}
+function drops(x,y,n=6){let s='';for(let i=0;i<n;i++){const a=-Math.PI/2+(i-(n-1)/2)*.5;s+=`<path d="M${x+Math.cos(a)*30},${y+Math.sin(a)*30} q-4,7 0,10 q4,-3 0,-10Z" fill="${K.yellow}" stroke="${K.ink}" stroke-width="1.5"/>`}return s}
+
+
+function crate(x,y,s,kind,n){const lem=kind==='lemon';return `<g transform="translate(${x},${y}) scale(${s})">${lem?R(-34,-26,68,40,'#C98A4B',`stroke="${K.ink}" stroke-width="3"`)+[0,1,2].map(i=>`<path d="M${-24+i*20},-30 q8,-10 16,0 q-8,10 -16,0Z" fill="${K.yellow}" stroke="${K.ink}" stroke-width="2"/>`).join(''):`<path d="M-30,14 Q-36,-20 -18,-30 L18,-30 Q36,-20 30,14Z" fill="${K.white}" stroke="${K.ink}" stroke-width="3"/><path d="M-16,-30 L-10,-38 L10,-38 L16,-30" fill="${K.white}" stroke="${K.ink}" stroke-width="2.5"/>`}<text x="0" y="${lem?2:2}" class="disp" font-size="13" text-anchor="middle">${lem?'LEMONS':'SUGAR'}</text>${n!=null?`<g transform="translate(0,34)">${R(-22,-13,44,24,K.yellow,`rx="5" stroke="${K.ink}" stroke-width="2.5"`)}<text y="5" class="disp" font-size="17" text-anchor="middle">${n}</text></g>`:''}</g>`}
+function bot(x,y,s,c,face,quiet){return `<g transform="translate(${x},${y}) scale(${s})"><rect x="-18" y="-40" width="36" height="34" rx="8" fill="${quiet?'#C9CDD8':c}" stroke="${K.ink}" stroke-width="2.5"/>${R(-12,-34,24,14,K.navy,`rx="3" stroke="${K.ink}" stroke-width="1.5"`)}<text x="0" y="-23" class="lcd" font-size="12" text-anchor="middle">${esc(face)}</text><line x1="0" y1="-40" x2="0" y2="-48" stroke="${K.ink}" stroke-width="2"/><circle cx="0" cy="-50" r="3.5" fill="${K.coral}" stroke="${K.ink}" stroke-width="1.5"/><path d="M-10,-6 L-12,4 M10,-6 L12,4" stroke="${K.ink}" stroke-width="3" stroke-linecap="round"/></g>`}
+function station(x,y,s,name,c,val,face,o={}){return `<g transform="translate(${x},${y}) scale(${s})">${R(-62,-40,124,80,o.quiet?'#EEF0F5':K.white,`rx="10" stroke="${o.hot?K.coral:K.ink}" stroke-width="${o.hot?4:3}"`)}<text x="0" y="-24" class="disp" font-size="14" text-anchor="middle" fill="${K.navy}" data-fit="112">${esc(name)}</text>${bot(-30,30,.9,c,face,o.quiet)}${val!=null?`<g transform="translate(22,6)">${R(-28,-16,56,30,o.quiet?'#C9CDD8':K.yellow,`rx="5" stroke="${K.ink}" stroke-width="2.5"`)}<text y="6" class="disp" font-size="18" text-anchor="middle" data-fit="50">${val}</text></g>`:''}</g>`}
+function tag(x,y,txt,c,s=1){return `<g transform="translate(${x},${y}) scale(${s})">${R(-24,-11,48,22,c||K.white,`rx="11" stroke="${K.ink}" stroke-width="2"`)}<text y="5" font-size="12.5" font-weight="700" text-anchor="middle">${txt}</text></g>`}
+function slip(x,y,txt,s=1){return `<g transform="translate(${x},${y}) scale(${s}) rotate(-6)">${R(-34,-15,68,30,K.coral2,`stroke="${K.ink}" stroke-width="2.5"`)}<text y="5" class="disp" font-size="15" text-anchor="middle" data-fit="62">${txt}</text></g>`}
+/* the whole factory: mode fwd | blame | nudge | plain */
+function factory(o){const s=o.s||1,X=o.x||0,Y=o.y||0,p=o.p||P0,L=o.L??4,S=o.S??2,t=o.t;const f=fwd(p,L,S),e=t!=null?f.y-t:0;
+  const pos={L:[70,70],S:[70,200],A:[330,70],B:[330,200],O:[590,135],C:[730,135]};
+  const P=k=>[X+pos[k][0]*s,Y+pos[k][1]*s];let g='';
+  const belt=(a,b,lab,w,hot,tt=.5)=>{const [x1,y1]=P(a),[x2,y2]=P(b),dx=x2-x1,dy=y2-y1;g+=`<line x1="${x1+48*s}" y1="${y1+dy*48*s/dx}" x2="${x2-66*s}" y2="${y2-dy*66*s/dx}" stroke="${hot?K.coral:K.ink}" stroke-width="${(hot?5:3)*s}" ${o.mode==='blame'?`marker-start="url(#arrC)"`:`marker-end="url(#arr)"`}/>`;
+    if(lab!=null)g+=tag(x1+dx*tt+(tt<.5?20*s:0),y1+dy*tt,lab,w,s)};
+  const show=o.mode!=='plain', hotB=o.mode==='blame';
+  belt('L','A',show?'×'+sgn(p.a[0]):null,K.lemon2,hotB&&f.za>0);belt('S','A',show?'×'+sgn(p.a[1]):null,K.lemon2,hotB&&f.za>0,.22);belt('L','B',show?'×'+sgn(p.b[0]):null,K.tint,hotB&&f.zb>0,.22);belt('S','B',show?'×'+sgn(p.b[1]):null,K.tint,hotB&&f.zb>0);
+  belt('A','O',show?'×'+sgn(p.v[0]):null,K.lemon2,hotB);belt('B','O',show?'×'+sgn(p.v[1]):null,K.tint,hotB);
+  g+=crate(...P('L'),s,'lemon',show?f2(L):null)+crate(...P('S'),s,'sugar',show?f2(S):null);
+  g+=station(...P('A'),s,o.nA||'WORKER A',K.lemon,show?f2(f.A):null,f.za>0?'^_^':'-_-',{quiet:f.za<=0,hot:hotB&&f.za>0});
+  g+=station(...P('B'),s,o.nB||'WORKER B','#9FB4FF',show?f2(f.B):null,f.zb>0?'^_^':'-_-',{quiet:f.zb<=0,hot:hotB&&f.zb>0});
+  g+=station(...P('O'),s,'THE BOSS',K.coral2,show?f2(f.y):null,'B)',{hot:hotB});
+  const [cx,cy]=P('C');g+=`<path d="M${cx},${cy+6*s}" stroke="none"/>`+`<line x1="${cx-74*s}" y1="${cy}" x2="${cx-30*s}" y2="${cy}" stroke="${K.ink}" stroke-width="${3*s}" ${o.mode==='blame'?'':'marker-end="url(#arr)"'}/>`+glassC(cx,cy+28*s,s);
+  if(show)g+=`<text x="${cx}" y="${cy+50*s}" font-size="${12*s}" font-weight="700" text-anchor="middle">guess</text>`;
+  if(o.mode==='blame'&&t!=null){const ba=e*p.v[0]*(f.za>0?1:0),bb=e*p.v[1]*(f.zb>0?1:0);
+    g+=slip(cx,cy-40*s,(e>0?'+':'−')+f2(Math.abs(e)),s)+slip(P('A')[0]+80*s,P('A')[1]-44*s,(ba>=0?'+':'−')+f2(Math.abs(ba)),s)+slip(P('B')[0]+80*s,P('B')[1]+50*s,(bb>=0?'+':'−')+f2(Math.abs(bb)),s)}
+  return g}
+function glassC(x,y,s){return `<g transform="translate(${x},${y}) scale(${s})"><path d="M-16,-44 L16,-44 L12,0 L-12,0Z" fill="${K.white}" stroke="${K.ink}" stroke-width="2.5"/><path d="M-14.6,-30 L14.6,-30 L12,0 L-12,0Z" fill="${K.yellow}" stroke="${K.ink}" stroke-width="1.6"/></g>`}
+function mo(x,y,s,o={}){return person(x,y,s,{c:K.lemon,sk:K.skin3,mood:o.mood||'happy',flip:o.flip,reach:o.reach,hat:K.white})}
+function stamp(x,y,s,txt,c){return `<g transform="translate(${x},${y}) rotate(-12) scale(${s})">${R(-70,-22,140,44,'none',`rx="6" stroke="${c||K.coral}" stroke-width="5"`)}<text y="9" class="disp" font-size="26" text-anchor="middle" fill="${c||K.coral}" data-fit="128">${esc(txt)}</text></g>`}
+function tasteMap(o){const {x,y,w,h}=o,f=o.f,cw=w/6,ch=h/6;let g='';
+  for(let L=1;L<=6;L++)for(let S=1;S<=6;S++){const v=f(L,S),t=Math.max(0,Math.min(1,(v-1)/8));g+=R(x+(S-1)*cw,y+(6-L)*ch,cw,ch,mixC(t),`stroke="${K.white}" stroke-width="1.5"`)+(o.nums?`<text x="${x+(S-.5)*cw}" y="${y+(6.5-L)*ch+4}" font-size="${o.fs||11}" font-weight="700" text-anchor="middle">${(Math.round(v*10)/10).toFixed(1)}</text>`:'')}
+  g+=R(x,y,w,h,'none',`stroke="${K.ink}" stroke-width="2.5"`);
+  for(let i=1;i<=6;i++)g+=`<text x="${x+(i-.5)*cw}" y="${y+h+14}" font-size="11" text-anchor="middle">${i}</text><text x="${x-7}" y="${y+(6.5-i)*ch+4}" font-size="11" text-anchor="end">${i}</text>`;
+  if(o.lab!==false)g+=`<text x="${x+w/2}" y="${y+h+30}" font-size="12" font-weight="700" text-anchor="middle">spoons of sugar →</text><text x="${x-24}" y="${y+h/2}" font-size="12" font-weight="700" text-anchor="middle" transform="rotate(-90 ${x-24} ${y+h/2})">lemons →</text>`;
+  return g}
+function mixC(t){const a=[255,179,166],b=[255,238,140],c=[118,185,71];const m=t<.5?a.map((v,i)=>v+(b[i]-v)*t*2):b.map((v,i)=>v+(c[i]-v)*(t-.5)*2);return `rgb(${m.map(Math.round).join(',')})`}
+function pip(x,y,s,o={}){return person(x,y,s,{c:K.navy2,sk:K.skin2,hair:'#7A3E12',mood:o.mood||'happy',flip:o.flip,reach:o.reach})+`<g transform="translate(${x},${y}) scale(${(o.flip?-1:1)*s},${s})"><path d="M-14,-86 Q0,-104 14,-86 L18,-82 L-18,-82Z" fill="${K.line}" stroke="${K.ink}" stroke-width="2"/><path d="M14,-84 L26,-80" stroke="${K.ink}" stroke-width="3" stroke-linecap="round"/></g>`}
+const realTaste=(L,S)=>RC.find(r=>r[0]===L&&r[1]===S)[2];
+
+const pages=[];
+
+/* ---------- COVER ---------- */
+(function(){
+  let rays='';for(let i=0;i<20;i++){const a1=i*Math.PI/10,a2=a1+Math.PI/20;rays+=`<path d="M400,360 L${400+900*Math.cos(a1)},${360+900*Math.sin(a1)} L${400+900*Math.cos(a2)},${360+900*Math.sin(a2)}Z" fill="${K.navy2}"/>`}
+  const body=R(0,0,800,580,K.navy)+rays+R(0,0,800,580,'url(#dotsW)','opacity=".5"')+
+   OUT(400,96,'THE BLAME',{size:80,fill:K.yellow,sw:10,fit:640})+OUT(400,180,'GAME',{size:100,fill:K.coral,sw:11,fit:740})+
+   `<text x="400" y="216" class="disp" font-size="22" text-anchor="middle" fill="${K.white}" letter-spacing="2" data-fit="660">A NEURAL NETWORK &amp; BACKPROPAGATION ADVENTURE</text>`+
+   `<g transform="translate(-26,200) rotate(-10 92 70)">${R(30,38,124,64,K.coral,`stroke="${K.ink}" stroke-width="3"`)}<text x="92" y="66" class="disp" font-size="22" text-anchor="middle" fill="${K.white}">ISSUE #11</text><text x="92" y="90" class="disp" font-size="17" text-anchor="middle" fill="${K.ink}" data-fit="112">WHO DID IT?!</text></g>`+
+   R(40,232,720,280,K.white,`rx="12" stroke="${K.ink}" stroke-width="3"`)+factory({x:30,y:250,s:.95,mode:'blame',t:6})+
+   R(0,540,800,40,K.lemon,`stroke="${K.ink}" stroke-width="3"`)+R(0,540,800,40,'url(#dots)','opacity=".4"')+
+   `<text x="400" y="570" class="disp" font-size="20" text-anchor="middle" fill="${K.ink}" letter-spacing="2" data-fit="760">STARRING XIRI, LINO, MO, PIP &amp; CORVIN · HOW MACHINES LEARN FROM MISTAKES</text>`;
+  pages.push({cls:'cover',panels:[P(6,580,body)],id:'cover'});
+})();
+
+/* ---------- CHAPTER 1 ---------- */
+pages.push(chTitle(1,'TOO MANY LEMONS','In which every taste test costs real lemons.',K.yellow,crate(600,160,2,'lemon')+crate(720,170,2,'sugar')));
+
+pages.push({panels:[
+  P(6,340, bg(800,340,K.yellow2,.3)+R(0,286,800,54,'#C98A4B',`stroke="${K.ink}" stroke-width="3"`)+
+    R(160,226,420,14,K.coral2,`stroke="${K.ink}" stroke-width="3"`)+[...Array(9)].map((_,i)=>glassC(190+i*46,226,.8)).join('')+
+    maya(100,300,.95,{mood:'det',arms:'hold'})+mo(660,304,1.05,{mood:'happy'})+lino(760,300,.6,{face:'o_o'})+
+    CAP(14,28,'January. Xiri wants to invent the perfect new lemonade.',{size:15})+
+    B(200,90,'Each test glass costs lemons and sugar.|I\'m running out!',110,150,{size:15})+
+    B(640,90,'Taster Mo, at your service.|I score every glass 0 to 10.',660,190,{size:15})),
+  P(3,370, bg(400,370,K.white,.15)+CAP(12,24,'Mo\'s scores for 36 test recipes',{size:14})+
+    tasteMap({x:76,y:52,w:270,h:240,f:realTaste,nums:true})+
+    TX(200,354,'Best when lemons and sugar MATCH (green diagonal).',{size:13})),
+  P(3,370, bg(400,370,K.white,.15)+CAP(12,24,'Issue #1\'s straight-line trick',{size:14})+
+    tasteMap({x:76,y:52,w:270,h:240,f:(L,S)=>LINE[0]*L+LINE[1]*S+LINE[2],nums:true})+
+    TX(200,334,'It guesses about 6 for EVERYTHING.',{size:13,cls:'lt'})+TX(200,354,'Average error (MSE): 4.73. A line can\'t make a hill!',{size:12.5}))
+]});
+
+pages.push({panels:[
+  P(3,330, bg(400,330,K.yellow2,.35)+
+    lino(100,316,1,{face:'^o^',arms:'up'})+pip(320,316,.85,{mood:'wow',flip:true})+
+    B(170,40,'I\'ll build a tiny FACTORY inside|me: workers that pass parts|down an assembly line!',100,190,{size:14})+
+    B(300,140,'A factory that makes…|guesses?',320,214,{size:13})),
+  P(3,330, bg(400,330,K.white,.15)+NOTE(22,38,'The plan: teach a machine to|**guess Mo\'s score** for any recipe.|Then Xiri can test 100 recipes|in her head, and only squeeze|the best one for real.',{size:14})+
+    maya(330,316,.8,{mood:'smile',arms:'point',flip:true})),
+  recapX(6,210,'• Mo scored 36 test recipes. The tastiest have matching lemons and sugar.|• A straight line (Issue #1) can\'t follow a "hill" like that: error 4.73.|• Lino\'s plan: a little factory of workers that learns to guess Mo\'s score.')
+]});
+
+/* ---------- CHAPTER 2 ---------- */
+pages.push(chTitle(2,'MEET THE WORKERS','In which one recipe rides the assembly line.',K.lemon,bot(620,200,2.2,K.lemon,'^_^')+bot(720,200,2.2,'#9FB4FF','^_^')));
+
+pages.push({panels:[
+  P(6,330, bg(800,330,K.tint,.2)+CAP(14,28,'Lino\'s factory floor plan',{size:15})+
+    factory({x:20,y:52,s:1,mode:'plain'})+
+    TX(110,320,'Ingredients come in',{size:13})+TX(370,320,'Two workers mix them',{size:13})+TX(640,320,'The Boss makes the final guess',{size:13})),
+  P(3,350, bg(400,350,K.white,.15)+CAP(12,24,'One worker, up close',{size:14})+
+    bot(70,200,1.8,K.lemon,'^_^')+
+    `<g transform="translate(240,110)">${R(-130,-46,260,150,K.yellow2,`stroke="${K.ink}" stroke-width="2.5"`)}<text x="0" y="-20" class="disp" font-size="16" text-anchor="middle">WORKER A'S JOB</text><text x="-116" y="8" font-size="14">1. lemons × my lemon knob</text><text x="-116" y="32" font-size="14">2. + sugar × my sugar knob</text><text x="-116" y="56" font-size="14">3. + my head start</text><text x="-116" y="80" font-size="14" font-weight="700">4. Below zero? Stay quiet (0).</text></g>`+
+    TX(200,312,'Knobs say how much each worker LISTENS',{size:13})+TX(200,330,'to each ingredient.',{size:13})),
+  P(3,350, bg(400,350,K.white,.15)+NOTE(22,38,'WORDS FOR THE FACTORY|A worker = a **neuron**.|Its knobs = **weights**.|Each row of workers = a **layer**.|The whole factory = a **neural network**.|(Real ones have millions of workers!)',{size:14})+
+    lino(330,340,.75,{face:'^_^'}))
+]});
+
+pages.push({panels:[
+  P(6,350, bg(800,350,K.tint,.2)+CAP(14,28,'Test recipe: 4 lemons, 2 spoons of sugar. The factory\'s very first try:',{size:15})+
+    factory({x:20,y:56,s:1,mode:'fwd',L:4,S:2})+
+    `<g transform="translate(30,306)">${R(0,0,740,34,K.white,`stroke="${K.ink}" stroke-width="2"`)}<text x="12" y="23" font-size="14">A: 1×4 + 1×2 + 0.5 = <tspan font-weight="700">6.5</tspan> · B: 1×4 + 1×2 − 1 = <tspan font-weight="700">5</tspan> · Boss: 1×6.5 + 0.5×5 = <tspan font-weight="700">9</tspan></text></g>`),
+  P(3,330, bg(400,330,K.yellow2,.3)+
+    mo(110,316,1.1,{mood:'sad'})+glassC(110,196,1.2)+stamp(290,120,1,'TOO HIGH BY 3')+
+    B(260,226,'The factory guessed 9.|I give it a 6.',130,246,{size:14})),
+  P(3,330, bg(400,330,K.white,.15)+NOTE(22,38,'Sending a recipe forward through|the workers to get a guess is the|**forward pass**. Comparing the|guess to Mo\'s real score gives the|**error**: here, 9 − 6 = **+3**.',{size:14})+
+    crow(330,316,.7,-1)),
+  recapX(6,210,'• Each worker multiplies the ingredients by its knobs, adds them up, and stays quiet if the total is below 0.|• **Forward pass**: recipe in → workers → Boss → guess.|• First try: guess 9, Mo says 6. Error +3. Now what?')
+]});
+
+/* ---------- CHAPTER 3: BACKPROP ---------- */
+pages.push(chTitle(3,'PASSING THE BLAME','In which the bad news travels backward down the line.',K.coral,slip(600,110,'+3',2)+slip(700,170,'+1.5',1.6)+slip(640,210,'+3',1.4)));
+
+pages.push({panels:[
+  P(6,330, bg(800,330,K.white,.15)+
+    `<g transform="translate(120,180)">${R(-90,-90,180,180,K.coral2,`rx="12" stroke="${K.ink}" stroke-width="3"`)}${bot(0,50,2.4,K.coral2,'>_<')}</g>`+
+    `<g transform="translate(360,120)">${R(-130,-60,260,120,K.white,`stroke="${K.ink}" stroke-width="3"`)}<text x="0" y="-30" class="disp" font-size="18" text-anchor="middle">THE BOSS THINKS:</text><text x="0" y="0" font-size="15" text-anchor="middle">"I listened to A with knob <tspan font-weight="700">1</tspan>,</text><text x="0" y="22" font-size="15" text-anchor="middle">and to B with knob <tspan font-weight="700">0.5</tspan>."</text></g>`+
+    `<path d="M500,140 L560,100" stroke="${K.coral}" stroke-width="4" marker-end="url(#arrC)"/><path d="M500,160 L560,220" stroke="${K.coral}" stroke-width="4" marker-end="url(#arrC)"/>`+
+    slip(640,96,'A: 3 × 1 = 3',1.6)+slip(640,226,'B: 3 × 0.5 = 1.5',1.6)+
+    CAP(14,28,'STEP 1 · Hand out the blame.',{size:15})+
+    TX(400,300,'Each worker gets blame in proportion to how much the Boss LISTENED to them. A was trusted more, so A gets more blame.',{size:14})),
+  P(3,350, bg(400,350,K.white,.15)+CAP(12,24,'STEP 2 · The Boss fixes his own knobs.',{size:13})+
+    `<g transform="translate(200,130)">${R(-170,-60,340,120,K.yellow2,`stroke="${K.ink}" stroke-width="2.5"`)}<text x="-156" y="-30" font-size="14">Push = error × that worker's report</text><text x="-156" y="0" font-size="14">A-knob: 3 × 6.5 = <tspan font-weight="700">19.5</tspan> → 1 turns to <tspan font-weight="700">0.90</tspan></text><text x="-156" y="28" font-size="14">B-knob: 3 × 5 = <tspan font-weight="700">15</tspan> → 0.5 turns to <tspan font-weight="700">0.43</tspan></text></g>`+
+    TX(200,226,'Guess too HIGH, so turn knobs DOWN.',{size:14,cls:'lt'})+TX(200,248,'Louder reports get bigger nudges.',{size:13})+
+    bot(200,330,1.2,K.coral2,'-_-')),
+  P(3,350, bg(400,350,K.white,.15)+CAP(12,24,'STEP 3 · Each worker fixes ITS knobs.',{size:13})+
+    `<g transform="translate(200,130)">${R(-170,-60,340,140,K.lemon2,`stroke="${K.ink}" stroke-width="2.5"`)}<text x="-156" y="-30" font-size="14">Push = my blame × what came in</text><text x="-156" y="-2" font-size="14">A, lemons: 3 × 4 = 12 → 1 to <tspan font-weight="700">0.94</tspan></text><text x="-156" y="20" font-size="14">A, sugar: 3 × 2 = 6 → 1 to <tspan font-weight="700">0.97</tspan></text><text x="-156" y="42" font-size="14">B, lemons: 1.5 × 4 = 6 → <tspan font-weight="700">0.97</tspan></text><text x="-156" y="64" font-size="14">B, sugar: 1.5 × 2 = 3 → <tspan font-weight="700">0.985</tspan></text></g>`+
+    TX(200,262,'More lemons came in than sugar,',{size:13})+TX(200,280,'so the lemon knobs move the most.',{size:13})+
+    bot(140,346,.9,K.lemon,'o_o')+bot(260,346,.9,'#9FB4FF','o_o'))
+]});
+
+pages.push({panels:[
+  P(6,360, bg(800,360,K.tint,.2)+CAP(14,28,'The blame flows BACKWARD (coral), the same path the parts came FORWARD.',{size:15})+
+    factory({x:20,y:58,s:1,mode:'blame',L:4,S:2,t:6})+
+    TX(400,342,'Nobody needs to see the whole factory. Each worker only hears from the station right after it.',{size:14})),
+  P(3,330, bg(400,330,K.white,.15)+NOTE(22,38,'Every nudge is TINY: push × 0.005.|(That\'s the **learning rate**, the|step size from Issue #1\'s hill!)|Big nudges would overshoot.|Tiny ones add up over time.',{size:14})+
+    lino(330,316,.75,{face:'0.005'})),
+  P(3,330, bg(400,330,K.yellow2,.3)+CAP(12,24,'STEP 4 · Try the same recipe again.',{size:13})+
+    `<g transform="translate(200,140)">${R(-150,-60,300,120,K.white,`stroke="${K.ink}" stroke-width="3"`)}<text x="0" y="-26" font-size="15" text-anchor="middle">Before: guess <tspan font-weight="700">9.00</tspan></text><text x="0" y="6" font-size="15" text-anchor="middle">After one nudge: guess <tspan font-weight="700">${f2(fwd(bstep(P0,4,2,6,LR).q,4,2).y)}</tspan></text><text x="0" y="38" font-size="15" text-anchor="middle">Mo's score: <tspan font-weight="700">6</tspan></text></g>`+
+    SFX(200,250,'CLOSER!',{size:34,fill:K.lemon,rot:-6}))
+]});
+
+pages.push({panels:[
+  P(3,330, bg(400,330,K.white,.15)+NOTE(22,38,'This whole blame-passing trick is|called **backpropagation**: send the|error backward, give each worker its|fair share, and let everyone nudge|their knobs to shrink the error.',{size:14})+
+    maya(330,316,.8,{mood:'happy',arms:'point',flip:true})),
+  P(3,330, bg(400,330,K.white,.15)+
+    `<g transform="translate(110,180)">${R(-80,-70,160,140,'#EEF0F5',`rx="10" stroke="${K.ink}" stroke-width="3"`)}${bot(0,40,1.8,'#C9CDD8','-_-')}<text x="0" y="-46" class="disp" font-size="14" text-anchor="middle">QUIET WORKER</text></g>`+
+    crow(300,316,.8,-1)+
+    B(270,40,'What if a worker stayed quiet|(said 0)? Does it get blamed?',300,236,{size:13})+
+    B(130,292,'No! It didn\'t help,|so no blame.',112,254,{size:13})),
+  recapX(6,210,'• **Backpropagation** = passing blame backward, station by station.|• Blame for a worker = error × how much the next station listened to it.|• Each knob nudges by (blame × what came in) × a tiny learning rate.')
+]});
+
+/* ---------- CHAPTER 4 ---------- */
+pages.push(chTitle(4,'PRACTICE, PRACTICE','In which 36 recipes go around 300 times.',K.tint,
+  `<g transform="translate(560,40)">${R(0,0,210,170,K.white,`stroke="${K.ink}" stroke-width="4"`)}<path d="M20,30 L50,40 L80,42 L100,44 L120,120 L150,148 L190,152" fill="none" stroke="${K.line}" stroke-width="5"/></g>`));
+
+pages.push({panels:[
+  P(6,360, bg(800,360,K.tint,.2)+
+    chart({x0:0,x1:300,y0:0,y1:40,xt:[0,50,100,150,200,250,300],yt:[0,10,20,30,40],x:80,y:40,w:430,h:250,xl:'Practice rounds (each round = all 36 recipes)',yl:'Average error (MSE)',ylo:46,pts:[],dots:false,
+      over:(sx,sy)=>`<path d="${HIST.map((v,i)=>(i?'L':'M')+sx(i).toFixed(1)+','+sy(Math.min(40,v)).toFixed(1)).join(' ')}" fill="none" stroke="${K.line}" stroke-width="4"/>`+
+        `<line x1="${sx(0)}" y1="${sy(4.73)}" x2="${sx(300)}" y2="${sy(4.73)}" stroke="${K.navy}" stroke-width="2" stroke-dasharray="6 5"/><text x="${sx(296)}" y="${sy(4.73)-6}" font-size="12" font-weight="700" text-anchor="end" fill="${K.navy}">straight line: 4.73</text>`+
+        `<text x="${sx(6)}" y="${sy(36.5)}" font-size="12.5" font-weight="700">start: 36.5</text><text x="${sx(20)}" y="${sy(10.5)}" font-size="12.5" font-weight="700">stuck near 8…</text><text x="${sx(60)}" y="${sy(3)}" font-size="12.5" font-weight="700">…then it clicks!</text><text x="${sx(296)}" y="${sy(1.6)}" font-size="12.5" font-weight="700" text-anchor="end">round 300: ${f2(HIST[300])}</text>`})+
+    maya(632,350,1.1,{mood:'happy',arms:'point',flip:true})+lino(748,350,.75,{face:'0.14'})+
+    B(660,40,'Forward, blame, nudge…|36 recipes × 300 rounds.|Error: 36.5 → 0.14!',632,182,{size:15})),
+  P(3,370, bg(400,370,K.white,.15)+CAP(12,24,'The factory\'s guesses after practice',{size:14})+
+    tasteMap({x:76,y:52,w:270,h:240,f:(L,S)=>fwd(PT,L,S).y,nums:true})+
+    TX(200,354,'Almost exactly Mo\'s map. It found the hill!',{size:13})),
+  P(3,370, bg(400,370,K.white,.15)+NOTE(22,38,'Nobody TOLD the workers what to|look for. After practice:|**Worker B** speaks up only when there|are more lemons than sugar, and|the Boss SUBTRACTS it: a|**Too-Sour Alarm**!|**Worker A** goes quiet when sugar|takes over: a **Not-Too-Sweet Meter**.',{size:13.5})+
+    bot(110,350,1,K.lemon,'^_^')+bot(290,350,1,'#9FB4FF','>_<'))
+]});
+
+pages.push({panels:[
+  P(6,330, bg(800,330,K.tint,.2)+CAP(14,28,'Same factory, after practice. Recipe 4 lemons, 2 sugar:',{size:15})+
+    factory({x:20,y:56,s:1,mode:'fwd',p:PT,L:4,S:2,nA:'NOT-TOO-SWEET',nB:'TOO-SOUR ALARM'})+
+    TX(400,318,'Guess '+f2(fwd(PT,4,2).y)+' · Mo\'s score 6. The knobs are totally different now, and much better.',{size:14})),
+  P(3,330, bg(400,330,K.white,.15)+NOTE(22,38,'Why did it get stuck at first? Like|a ball on a bumpy hill (Issue #1),|the knobs sat on a flat spot before|finding the way down. Training|takes patience!',{size:14})+
+    pip(330,316,.8,{mood:'happy'})),
+  P(3,330, bg(400,330,K.white,.15)+NOTE(22,38,'More workers and more rows of|workers can learn harder patterns.|Many rows = **deep learning**.|Same blame game, just a longer|assembly line.',{size:14})+
+    lino(330,316,.75,{face:'DEEP'})),
+  recapX(6,210,'• Training = forward, blame, nudge, over and over: 36 recipes × 300 rounds.|• Error fell from 36.5 to 0.14 (the straight line was stuck at 4.73).|• The workers invented their own jobs: a Too-Sour Alarm and a Not-Too-Sweet Meter.')
+]});
+
+/* ---------- CHAPTER 5 ---------- */
+pages.push(chTitle(5,'THE RECIPE CONTEST','In which the factory tastes without a tongue.',K.lemon2,glassC(640,220,2.6)+`<g transform="translate(730,210) scale(1.2)"><path d="M-26,-90 L26,-90 L22,-52 Q0,-36 -22,-52Z" fill="${K.yellow}" stroke="${K.ink}" stroke-width="3"/><rect x="-6" y="-44" width="12" height="20" fill="${K.yellow}" stroke="${K.ink}" stroke-width="2.5"/><rect x="-22" y="-24" width="44" height="24" fill="${K.navy}" stroke="${K.ink}" stroke-width="3"/></g>`));
+
+pages.push({panels:[
+  P(6,330, bg(800,330,K.coral2,.25)+
+    `<g transform="rotate(-3 220 140)">${R(110,50,220,170,K.yellow,`stroke="${K.ink}" stroke-width="4"`)}${OUT(220,104,'RECIPE',{size:34,fill:K.coral,sw:5})}${OUT(220,144,'CONTEST',{size:34,fill:K.coral,sw:5})}<text x="220" y="178" class="disp" font-size="18" text-anchor="middle" fill="${K.navy}" data-fit="200">RULE: ONLY 2.5 LEMONS!</text><text x="220" y="202" font-size="13" text-anchor="middle">(there's a lemon shortage)</text></g>`+
+    maya(480,320,1,{mood:'think',arms:'chin'})+lino(610,320,.85,{face:'^_^',arms:'point'})+crow(730,310,.8,-1)+
+    B(540,60,'How much sugar? I can\'t afford|to test them all for real.',480,170,{size:15})+
+    B(660,150,'I\'ll test them|in my head!',620,214,{size:14})),
+  P(3,350, bg(400,350,K.white,.15)+CAP(12,24,'The factory\'s guesses for 2.5 lemons',{size:14})+
+    chart({x0:0.75,x1:4.25,y0:5,y1:10,xt:[],yt:[5,6,7,8,9,10],x:60,y:50,w:310,h:210,padL:40,padB:40,padT:10,padR:12,xl:'Spoons of sugar',xlo:32,yl:'',pts:[],dots:false,
+      over:(sx,sy)=>[1,1.5,2,2.5,3,3.5,4].map(s=>{const v=fwd(PT,2.5,s).y,best=s===2.5;return `<text x="${sx(s)}" y="${sy(5)+16}" font-size="11.5" text-anchor="middle"${best?' font-weight="700"':''}>${s}</text>`+R(sx(s)-14,sy(v),28,sy(5)-sy(v),best?K.lemon:K.tint2,`stroke="${K.ink}" stroke-width="2"`)+`<text x="${sx(s)}" y="${sy(v)-6}" font-size="11.5" font-weight="700" text-anchor="middle">${(Math.round(v*10)/10).toFixed(1)}</text>`}).join('')})+
+    TX(200,334,'Best guess: **2.5 spoons → '+(Math.round(fwd(PT,2.5,2.5).y*10)/10).toFixed(1)+'**',{size:14})),
+  P(3,350, bg(400,350,K.yellow2,.3)+
+    mo(110,336,1.05,{mood:'wow'})+glassC(110,212,1.2)+maya(320,336,.9,{mood:'happy',arms:'up',flip:true})+
+    SFX(230,90,'9 OUT OF 10!',{size:30,fill:K.lemon,rot:-8})+
+    B(250,190,'Only ONE glass squeezed,|and it\'s a winner!',300,214,{size:13}))
+]});
+
+pages.push({panels:[
+  P(6,330, bg(800,330,K.white,.15)+
+    `<g transform="translate(30,40)">${R(0,0,350,250,K.lemon2,`stroke="${K.ink}" stroke-width="3"`)}<text x="175" y="34" class="disp" font-size="24" text-anchor="middle" data-fit="320">WHAT NETWORKS DO WELL</text>`+
+      ['Learn curvy, tricky patterns.','Invent their own helper jobs.','Grow bigger for harder problems.','Power photo, voice and chat AI.'].map((t,i)=>`<text x="22" y="${78+i*40}" font-size="15">✓ ${t}</text>`).join('')+`</g>`+
+    `<g transform="translate(410,40)">${R(0,0,360,250,K.coral2,`stroke="${K.ink}" stroke-width="3"`)}<text x="180" y="34" class="disp" font-size="24" text-anchor="middle">WATCH OUT FOR</text>`+
+      ['Need LOTS of examples.','Hard to explain WHY (black box).','Can overfit (Issue #2!).','Training can get stuck for a while.'].map((t,i)=>`<text x="22" y="${78+i*40}" font-size="15">✗ ${t}</text>`).join('')+`</g>`),
+  P(3,330, bg(400,330,K.white,.15)+NOTE(22,38,'The same blame game trains the|giant networks behind photo apps,|voice assistants and chatbots:|millions of workers, billions of|knobs, one tiny nudge at a time.',{size:14})+
+    pip(330,316,.8,{mood:'wow'})),
+  P(3,330, bg(400,330,K.white,.15)+
+    crow(100,316,.9,1)+lino(320,316,.85,{face:'^_^'})+
+    B(150,40,'So when something goes wrong,|you share the blame fairly,|then everyone improves a bit?',110,214,{size:13})+
+    B(290,150,'That\'s it! Good advice for|factories AND friends.',320,220,{size:13})),
+  P(6,300, bg(800,300,K.navy,0)+R(0,0,800,300,'url(#dotsW)','opacity=".4"')+
+    `<g transform="translate(560,180)">${knob(-60,0,40,8,'')}${knob(40,0,40,8,'')}${knob(140,0,40,8,'')}${R(-110,60,300,30,K.yellow,`stroke="${K.ink}" stroke-width="3"`)}<text x="40" y="81" class="disp" font-size="18" text-anchor="middle">BUDGET: 10 POINTS</text></g>`+
+    lino(140,290,.9,{face:'>_<',arms:'up'})+crow(260,280,.8,1)+
+    B(250,50,'Lino\'s knobs keep growing HUGE…|What if each knob cost points from a budget?',200,170,{size:15})+
+    OUT(780,64,'COMING SOON',{size:28,anchor:'end',fill:K.yellow,sw:6})+OUT(780,98,'THE KNOB BUDGET',{size:26,anchor:'end',fill:K.lemon,sw:6})),
+  recapX(6,210,'• The trained factory found the best 2.5-lemon recipe without wasting a single test glass.|• Neural networks learn tricky patterns but need lots of data and are hard to explain.|• Next time: keeping knobs small with a budget (regularization).')
+]});
+
+/* ---------- THE END ---------- */
+pages.push({cls:'end',panels:[P(6,260, bg(800,260,K.navy,0)+R(0,0,800,260,'url(#dotsW)','opacity=".5"')+
+  OUT(400,100,'THE END',{size:84,fill:K.yellow,sw:10,fit:420})+`<text x="400" y="140" class="disp" font-size="22" text-anchor="middle" fill="${K.white}" letter-spacing="2" data-fit="460">…OF ISSUE #11. NEXT: THE FACTORY LAB, CHEAT SHEET &amp; QUIZ</text>`+
+  maya(110,250,.95,{mood:'happy',arms:'wave'})+lino(690,250,.95,{face:'^_^',arms:'wave',flip:true}))],id:'end'});
+
+/* ---------- LAB, CHEAT SHEET, QUIZ ---------- */
+pages.push({html:`<section class="hpage" id="lab" aria-labelledby="labh">
+  <div class="kicker">TRY IT YOURSELF</div>
+  <h2 id="labh">The Factory Lab</h2>
+  <p>Pick a recipe and play the blame game one step at a time: forward pass, pass the blame, nudge the knobs. Or train lots of rounds at once and watch the error fall.</p>
+  <div class="lab" style="grid-template-columns:minmax(0,1fr)">
+    <svg id="labsvg" viewBox="0 0 800 300" role="img" aria-label="Lino's factory: ingredients, two workers and the Boss, with knob values"></svg>
+    <div class="knobs" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+      <div class="knob"><label for="fl"><span>LEMONS</span><span id="flv">4</span></label><input type="range" id="fl" min="1" max="6" step="1" value="4"></div>
+      <div class="knob"><label for="fs"><span>SUGAR</span><span id="fsv">2</span></label><input type="range" id="fs" min="1" max="6" step="1" value="2"></div>
+      <div class="score">MO SAYS <b id="fmv">6</b><small id="fmm">Guess 9 · error +3</small></div>
+      <div class="score" style="background:var(--yellow);color:var(--ink)">AVERAGE ERROR <b id="fev" style="color:var(--ink)">36.54</b><small id="frm" style="color:var(--ink)">over all 36 recipes · round 0</small></div>
+      <div class="btns" style="grid-column:1/-1"><button type="button" id="bfw">1 · Forward</button><button type="button" id="bbl">2 · Pass the blame</button><button type="button" id="bnu">3 · Nudge knobs</button><button type="button" id="b1">Train 1 round</button><button type="button" id="b50">Train 50 rounds</button><button type="button" id="brs">Reset factory</button></div>
+    </div>
+  </div>
+</section>`});
+pages.push({html:`<section class="hpage" id="cheat" aria-labelledby="ch">
+  <div class="kicker">LINO'S NOTEBOOK · TEAR-OUT PAGE</div>
+  <h2 id="ch">The Cheat Sheet</h2>
+  <div class="cheat">
+    <div class="card big"><h3>The idea</h3><div class="eq" style="font-size:clamp(24px,5vw,40px)">Guess, <span class="ln">blame</span>, nudge.</div><p>A neural network is an assembly line of simple workers. Backpropagation passes the blame for a wrong guess backward so every worker can nudge its knobs.</p></div>
+    <div class="card"><h3>Neuron (worker)</h3><p>Multiplies each input by a knob, adds them plus a head start, and stays quiet if the total is below zero (that rule is called ReLU).</p></div>
+    <div class="card"><h3>Weights (knobs)</h3><p>How much a worker listens to each input. Learning = finding good knob settings.</p></div>
+    <div class="card"><h3>Layers</h3><p>Rows of workers. Inputs → hidden workers → output (the Boss). Many hidden rows = deep learning.</p></div>
+    <div class="card"><h3>Forward pass</h3><p>Send a recipe through to get a guess. First try: 4 lemons, 2 sugar → A 6.5, B 5, guess 9. Mo said 6: error +3.</p></div>
+    <div class="card"><h3>Backpropagation</h3><p>Blame for a worker = error × how much the next station listened to it. A got 3 × 1 = 3; B got 3 × 0.5 = 1.5. Quiet workers get no blame.</p></div>
+    <div class="card"><h3>The nudge</h3><p>Each knob moves by blame × what came in × the learning rate (0.005), in the direction that shrinks the error. One nudge: guess 9 → 7.63.</p></div>
+    <div class="card big" style="background:var(--lemon2)"><h3>Lino's results</h3><p>36 recipes × 300 rounds: error 36.5 → 0.14 (a straight line: 4.73). The workers became a Too-Sour Alarm and a Not-Too-Sweet Meter on their own.</p></div>
+    <div class="card warn"><h3>Watch out</h3><ul><li>Networks need lots of examples.</li><li>They're hard to explain (a "black box").</li><li>They can overfit, so check on test data.</li><li>Training can stall on flat spots before improving.</li></ul></div>
+    <div class="card"><h3>Coming up</h3><p><b>The Knob Budget</b>: regularization, keeping knobs small so models stay simple.</p></div>
+  </div>
+</section>`});
+pages.push({html:`<section class="hpage" id="quiz" aria-labelledby="qh">
+  <div class="kicker">YOUR TURN</div>
+  <h2 id="qh">Who Gets the Blame?</h2>
+  <p>Tap an answer to see if you're right.</p>
+  <div class="quiz" id="quizbox"></div>
+</section>`});
+
+/* ============ render ============ */
+const book=document.getElementById('book');let pn=0,html='';
+pages.forEach((pg,i)=>{
+  if(pg.html){html+=pg.html;if(pg.html.includes('id="cheat"')===false&&i===1){} return}
+  pn++;
+  html+=`<section class="page ${pg.cls||''}"${pg.id?` id="${pg.id}"`:''}>`+pg.panels.map(p=>{const w=W[p.span];
+    const alt=p.body.replace(/<text[^>]*class="lcd"[^>]*>.*?<\/text>/g,'').match(/<tspan[^>]*>([^<]*)/g);
+    const label=alt?alt.map(t=>t.replace(/<[^>]*>/,'')).join(' ').replace(/\s+/g,' ').trim().slice(0,400):'Comic panel';
+    return `<div class="panel s${p.span}"><svg viewBox="0 0 ${w} ${p.h}" role="img" aria-label="${esc(label)}">${p.body}</svg></div>`}).join('')+
+    (pg.cls==='cover'?'':`<div class="pgno"><span>THE BLAME GAME</span><span>${pn}</span></div>`)+`</section>`;
+  if(pg.cls==='cover')html+=`<nav class="toc" aria-label="Chapters"><a href="#ch1">1 · Too Many Lemons</a><a href="#ch2">2 · Meet the Workers</a><a href="#ch3">3 · Passing the Blame</a><a href="#ch4">4 · Practice</a><a href="#ch5">5 · Recipe Contest</a><a href="#lab">Factory Lab</a><a href="#cheat">Cheat Sheet</a><a href="#quiz">Quiz</a></nav><p class="swipe">On a phone? Swipe wide panels sideways →</p>`;
+});
+book.innerHTML=html;
+
+/* ============ bubble / caption / note layout (measured) ============ */
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);e.classList.add('deco');return e}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function bbOf(g){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;g.querySelectorAll('text').forEach(t=>{const b=t.getBBox();x0=Math.min(x0,b.x);y0=Math.min(y0,b.y);x1=Math.max(x1,b.x+b.width);y1=Math.max(y1,b.y+b.height)});return {x:x0,y:y0,w:x1-x0,h:y1-y0}}
+function tailPts(r,tx,ty,hw=9){const cx=r.x+r.w/2,cy=r.y+r.h/2;
+  if(ty>r.y+r.h-4&&Math.abs(tx-cx)<r.w/2+60||ty>r.y+r.h+20){const bx=clamp(cx+(tx-cx)*.55,r.x+r.h/2+4,r.x+r.w-r.h/2-4),by=r.y+r.h;return [[bx-hw,by],[bx+hw,by],[tx,ty],0,-1]}
+  if(ty<r.y+4&&Math.abs(tx-cx)<r.w/2+60||ty<r.y-20){const bx=clamp(cx+(tx-cx)*.55,r.x+r.h/2+4,r.x+r.w-r.h/2-4),by=r.y;return [[bx-hw,by],[bx+hw,by],[tx,ty],0,1]}
+  const bx=tx>cx?r.x+r.w:r.x,by=clamp(ty,r.y+r.h*.3,r.y+r.h*.7);return [[bx,by-hw],[bx,by+hw],[tx,ty],tx>cx?-1:1,0]}
+function layout(){
+  document.querySelectorAll('.deco').forEach(e=>e.remove());
+  document.querySelectorAll('[data-fit]').forEach(t=>{t.removeAttribute('textLength');t.removeAttribute('lengthAdjust');const L=t.getComputedTextLength(),m=+t.dataset.fit;if(L>m){t.setAttribute('textLength',m);t.setAttribute('lengthAdjust','spacingAndGlyphs')}});
+  document.querySelectorAll('g.bub').forEach(g=>{
+    const b=bbOf(g),k=g.dataset.k,first=g.firstChild;
+    const r={x:b.x-13,y:b.y-8,w:b.w+26,h:b.h+16};
+    const fill=k==='x'?K.yellow:K.white;
+    if(k==='x'){const cx=r.x+r.w/2,cy=r.y+r.h/2,rx=r.w/2+16,ry=r.h/2+14;let pts=[];for(let i=0;i<28;i++){const a=i/28*Math.PI*2,f=i%2?1:.86;pts.push((cx+Math.cos(a)*rx*f).toFixed(1)+','+(cy+Math.sin(a)*ry*f).toFixed(1))}
+      if(g.dataset.tx!=null){const t=tailPts({x:cx-rx*.7,y:cy-ry*.75,w:rx*1.4,h:ry*1.5},+g.dataset.tx,+g.dataset.ty,10);g.insertBefore(el('polygon',{points:t.slice(0,3).map(p=>p.join(',')).join(' '),fill,stroke:K.ink,'stroke-width':3,'stroke-linejoin':'round'}),first)}
+      g.insertBefore(el('polygon',{points:pts.join(' '),fill,stroke:K.ink,'stroke-width':3,'stroke-linejoin':'round'}),first);return}
+    const rx=Math.min(r.h/2,20);
+    if(g.dataset.tx!=null){const t=tailPts(r,+g.dataset.tx,+g.dataset.ty);
+      g.insertBefore(el('polygon',{points:t.slice(0,3).map(p=>p.join(',')).join(' '),fill,stroke:K.ink,'stroke-width':3,'stroke-linejoin':'round'}),first);
+      g.insertBefore(el('rect',{x:r.x,y:r.y,width:r.w,height:r.h,rx,fill,stroke:K.ink,'stroke-width':3}),first);
+      const [p1,p2,tip,dx,dy]=t,ins=(p)=>[p[0]+dx*2.6+(p===p1?(dy?1.6:0):(dy?-1.6:0)),p[1]+dy*2.6+(p===p1?(dx?1.6:0):(dx?-1.6:0))];
+      const a=ins(p1),c=ins(p2),tp=[tip[0]+(a[0]+c[0]-2*tip[0])*.12,tip[1]+(a[1]+c[1]-2*tip[1])*.12];
+      g.insertBefore(el('polygon',{points:[a,c,tp].map(p=>p.join(',')).join(' '),fill}),first);
+    } else g.insertBefore(el('rect',{x:r.x,y:r.y,width:r.w,height:r.h,rx,fill,stroke:K.ink,'stroke-width':3}),first);
+  });
+  document.querySelectorAll('g.cap').forEach(g=>{const b=bbOf(g),r={x:b.x-9,y:b.y-6,w:b.w+18,h:b.h+12},first=g.firstChild;
+    g.insertBefore(el('rect',{x:r.x+4,y:r.y+4,width:r.w,height:r.h,fill:K.ink}),first);
+    g.insertBefore(el('rect',{x:r.x,y:r.y,width:r.w,height:r.h,fill:K.yellow,stroke:K.ink,'stroke-width':2.5}),first)});
+  document.querySelectorAll('g.note').forEach(g=>{const b=bbOf(g),r={x:b.x-22,y:b.y-16,w:b.w+36,h:b.h+24},first=g.firstChild;
+    g.insertBefore(el('rect',{x:r.x+5,y:r.y+5,width:r.w,height:r.h,fill:K.ink}),first);
+    g.insertBefore(el('rect',{x:r.x,y:r.y,width:r.w,height:r.h,fill:'url(#ruled)',stroke:K.ink,'stroke-width':2.5}),first);
+    g.insertBefore(el('line',{x1:r.x+12,y1:r.y,x2:r.x+12,y2:r.y+r.h,stroke:K.coral,'stroke-width':1.5}),first);
+    for(let x=r.x+26;x<r.x+r.w-10;x+=26)g.appendChild(el('circle',{cx:x,cy:r.y,r:4.5,fill:K.white,stroke:K.ink,'stroke-width':2}))});
+}
+layout();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(layout);
+window.addEventListener('load',layout);
+
+/* ============ Factory Lab ============ */
+(function(){
+  const svg=document.getElementById('labsvg'),fl=document.getElementById('fl'),fs=document.getElementById('fs');
+  let p=clone(P0),rounds=0,mode='fwd';
+  function draw(){const L=+fl.value,S=+fs.value,t=realTaste(L,S),f=fwd(p,L,S),e=f.y-t;
+    svg.innerHTML=factory({x:10,y:14,s:1,mode,p,L,S,t});
+    document.getElementById('flv').textContent=L;document.getElementById('fsv').textContent=S;document.getElementById('fmv').textContent=t;
+    document.getElementById('fmm').textContent='Guess '+f2(f.y)+' · error '+(e>=0?'+':'−')+f2(Math.abs(e));
+    document.getElementById('fev').textContent=mseP(p).toFixed(2);document.getElementById('frm').textContent='over all 36 recipes · round '+rounds;}
+  fl.addEventListener('input',()=>{mode='fwd';draw()});fs.addEventListener('input',()=>{mode='fwd';draw()});
+  document.getElementById('bfw').addEventListener('click',()=>{mode='fwd';draw()});
+  document.getElementById('bbl').addEventListener('click',()=>{mode='blame';draw()});
+  document.getElementById('bnu').addEventListener('click',()=>{const L=+fl.value,S=+fs.value;p=bstep(p,L,S,realTaste(L,S),LR).q;mode='fwd';draw()});
+  document.getElementById('b1').addEventListener('click',()=>{p=trainP(p,1);rounds++;mode='fwd';draw()});
+  document.getElementById('b50').addEventListener('click',()=>{p=trainP(p,50);rounds+=50;mode='fwd';draw()});
+  document.getElementById('brs').addEventListener('click',()=>{p=clone(P0);rounds=0;mode='fwd';draw()});
+  draw();
+})();
+
+/* ============ Quiz ============ */
+(function(){
+  const Q=[{q:'In Lino\'s factory, what does a "worker" (neuron) do?',o:['Tastes the lemonade','Multiplies its inputs by knobs, adds them up, and stays quiet if the total is below zero','Picks a random number'],a:1,w:'Each worker is a tiny calculator: inputs × knobs, add them up (plus a head start), and say 0 if the total is negative.'},
+    {q:'The guess was 3 too high. The Boss listened to Worker A with knob 2 and Worker B with knob 0.5. Who gets more blame?',o:['Worker A (3 × 2 = 6)','Worker B (3 × 0.5 = 1.5)','They get the same'],a:0,w:'Blame = error × how much the Boss listened. The Boss trusted A more, so A carries more of the blame.'},
+    {q:'A worker said 0 (stayed quiet) for this recipe. How much blame does it get?',o:['All of it','None: it didn\'t help make the guess','Half'],a:1,w:'A quiet worker didn\'t push the guess at all, so changing its knobs wouldn\'t change this guess. No blame.'},
+    {q:'Why are the knob nudges so tiny (× 0.005)?',o:['To save electricity','Big nudges can overshoot; tiny ones add up safely over many rounds','The knobs are fragile'],a:1,w:'That\'s the learning rate, like the step size on Issue #1\'s hill: too big and you overshoot, small and steady gets there.'},
+    {q:'What is "backpropagation" in one sentence?',o:['Running the factory backwards to make lemons','Passing the error backward so each worker learns its share of the blame and nudges its knobs','Throwing out bad recipes'],a:1,w:'Error goes backward station by station; every knob moves a little in the direction that makes the error smaller.'}];
+  const box=document.getElementById('quizbox');
+  box.innerHTML=Q.map((q,i)=>`<div class="q"><h3>Q${i+1}. ${q.q}</h3><div class="opts">${q.o.map((o,j)=>`<button type="button" data-q="${i}" data-o="${j}">${o}</button>`).join('')}</div><div class="fb" id="qf${i}" aria-live="polite"></div><div class="ans" id="qa${i}" hidden>${q.w}</div></div>`).join('');
+  box.addEventListener('click',e=>{const b=e.target.closest('button[data-q]');if(!b)return;const i=+b.dataset.q,j=+b.dataset.o,q=Q[i];
+    b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('right','wrong'));
+    b.classList.add(j===q.a?'right':'wrong');document.getElementById('qf'+i).textContent=j===q.a?'Yes! You got it.':'Not quite. Try another one.';
+    if(j===q.a)document.getElementById('qa'+i).hidden=false});
+})();
+</script>
+<style>.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}</style>
+<style>:root{--coral2:#FFC2B8}.opts{display:flex;flex-wrap:wrap;gap:8px}.opts button.right{background:var(--lemon)}.opts button.wrong{background:var(--coral2)}.page{grid-template-columns:repeat(12,minmax(0,1fr))}.s6{grid-column:span 12}.s4{grid-column:span 8}.s3{grid-column:span 6}.s2{grid-column:span 4}.sq{grid-column:span 3}@media (max-width:700px){.panel{grid-column:span 12}.sq{grid-column:span 6}}</style>
+
+</body>
+</html>
