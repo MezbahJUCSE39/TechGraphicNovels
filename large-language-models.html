@@ -527,11 +527,11 @@ pages.push({panels:[
     B(150,40,'So you\'re not a genius.|Just a REALLY good|guesser?',110,214,{size:13})+
     B(290,150,'A guesser that read|a LOT. Use me wisely!',320,220,{size:13})),
   P(6,300, bg(800,300,K.navy,0)+R(0,0,800,300,'url(#dotsW)','opacity=".4"')+
-    `<g transform="translate(600,190)">${dog(0,0,1.4)}</g>`+`<g transform="translate(680,120)">${R(-30,-14,60,26,K.yellow,`rx="12" stroke="${K.ink}" stroke-width="2"`)}<text y="4" font-size="13" font-weight="700" text-anchor="middle">TREAT</text></g>`+
-    pip(130,290,.9,{mood:'happy',reach:true})+lino(240,290,.75,{face:'...'})+
-    B(240,50,'Remember the thumbs up or down? What if a learner|got ONLY treats and no examples at all?',190,180,{size:15})+
-    OUT(340,264,'COMING SOON',{size:24,anchor:'start',fill:K.yellow,sw:5})+OUT(340,292,'THE TREAT TRAINER',{size:22,anchor:'start',fill:K.lemon,sw:5})),
-  recapX(6,210,'• LLMs can make up confident, wrong answers (**hallucinations**) and miss recent news.|• Give them the facts, ask for sources, and double-check what matters.|• Next time: learning from treats alone, called reinforcement learning.')
+    `<g transform="translate(660,150) rotate(5)">${R(-70,-90,140,180,K.white,`rx="6" stroke="${K.ink}" stroke-width="3"`)}${R(-30,-100,60,20,'#8A5A3B',`rx="4" stroke="${K.ink}" stroke-width="2"`)}<text y="-56" class="disp" font-size="16" text-anchor="middle">SATURDAY</text>${['buy lemons','buy sugar','tell Pip','check weather'].map((t,i)=>R(-56,-38+i*30,14,14,K.white,`stroke="${K.ink}" stroke-width="2"`)+`<text x="-34" y="${-26+i*30}" font-size="13">${t}</text>`).join('')}</g>`+
+    maya(130,290,.9,{mood:'think',arms:'chin'})+lino(240,290,.75,{face:'...'})+
+    B(240,50,'Lino can TALK about errands. But while I\'m away,|could he actually DO them?',190,180,{size:15})+
+    OUT(340,264,'COMING SOON',{size:24,anchor:'start',fill:K.yellow,sw:5})+OUT(340,292,'THE ERRAND RUNNER',{size:22,anchor:'start',fill:K.lemon,sw:5})),
+  recapX(6,210,'• LLMs can make up confident, wrong answers (**hallucinations**) and miss recent news.|• Give them the facts, ask for sources, and double-check what matters.|• Next time: AI that takes action, called agentic AI.')
 ]});
 
 /* ---------- THE END ---------- */
@@ -569,7 +569,7 @@ pages.push({html:`<section class="hpage" id="cheat" aria-labelledby="ch">
     <div class="card"><h3>Guesser → helper</h3><p><b>Pre-training</b> on huge text, <b>fine-tuning</b> on example chats, then <b>feedback</b>: people rate answers with a thumbs up or down.</p></div>
     <div class="card"><h3>Tokens</h3><p>Real LLMs chop text into pieces called tokens ("lemon" + "ade") and guess the next piece. Same game.</p></div>
     <div class="card warn"><h3>Watch out</h3><ul><li><b>Hallucinations</b>: confident, made-up facts.</li><li><b>Knowledge cutoff</b>: no news after practice stopped.</li><li>Copies biases from its text.</li><li>Give it facts, ask for sources, check what matters.</li></ul></div>
-    <div class="card"><h3>Coming up</h3><p><b>The Treat Trainer</b>: reinforcement learning, where a learner improves from rewards alone.</p></div>
+    <div class="card"><h3>Coming up</h3><p><b>The Errand Runner</b>: agentic AI, where an LLM uses tools to get real jobs done.</p></div>
   </div>
 </section>`});
 pages.push({html:`<section class="hpage" id="quiz" aria-labelledby="qh">
