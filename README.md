@@ -26,14 +26,15 @@ These are the ML concepts I think make strong graphic novels. Each has a clear v
 4. Attention / Transformers	A dinner party where every word decides whom to listen to.	It’s very current, very confusing to most people, and great for crowd scenes.
 5. Large language models	Lino plays a game of “guess the next word,” billions of times.	Everyone uses LLMs, and almost no one knows how they work.
 6. Agentic AI.
-7. Reinforcement learning: The Treat Trainer. Pip’s puppy learns tricks with no instructions, only treats. This explains trial and error, rewards, and exploring vs. sticking with what works. It also ties back to the thumbs up/down in #15.
-8. Explainable AI / SHAP: Who Gets the Credit? Lino turns down a supplier, and Xiri asks why. SHAP splits the credit for a decision fairly among the features, like splitting a group dinner bill by what each person ordered. This is your own research area, so it could be the flagship issue, and you could link it to your papers.
-9. Bias and fairness: The Lopsided Judge. A lemonade-tasting contest where the AI judge learned only from one neighborhood’s taste. It shows how skewed data leads to unfair results, which matters a lot in clinical AI.
-10. Retrieval-augmented generation (RAG): The Open-Book Exam. This picks up the hallucination problem from #15. Lino gets to look things up in the “Stand Facts” binder before answering, instead of answering from memory.
-11. Gradient boosting / XGBoost: The Relay Team. Each new small tree fixes the mistakes of the trees before it, and it pairs naturally with the “Council of Trees” (random forests) issue. You use XGBoost yourself, and it’s the workhorse for table-style data like clinical records.
-12. GANs: The Forger and the Detective. Corvin forges fake lemonade labels while Lino learns to spot them, and both get better. It has a built-in villain, which suits Corvin.
-13. Diffusion models: The Snow Globe. Image generators learn to un-shake a snow globe: start from static and remove the noise step by step until a picture appears. Everyone has seen AI images, and almost no one knows how they’re made.
-14. Transfer learning and fine-tuning: The Chef Who Switched Kitchens. A pastry chef learns to make lemonade fast because she already knows the basics. It explains why big pretrained models can be adapted cheaply.
+7. Evaluation of agentic AI.
+8. Reinforcement learning: The Treat Trainer. Pip’s puppy learns tricks with no instructions, only treats. This explains trial and error, rewards, and exploring vs. sticking with what works. It also ties back to the thumbs up/down in #15.
+9. Explainable AI / SHAP: Who Gets the Credit? Lino turns down a supplier, and Xiri asks why. SHAP splits the credit for a decision fairly among the features, like splitting a group dinner bill by what each person ordered. This is your own research area, so it could be the flagship issue, and you could link it to your papers.
+10. Bias and fairness: The Lopsided Judge. A lemonade-tasting contest where the AI judge learned only from one neighborhood’s taste. It shows how skewed data leads to unfair results, which matters a lot in clinical AI.
+11. Retrieval-augmented generation (RAG): The Open-Book Exam. This picks up the hallucination problem from #15. Lino gets to look things up in the “Stand Facts” binder before answering, instead of answering from memory.
+12. Gradient boosting / XGBoost: The Relay Team. Each new small tree fixes the mistakes of the trees before it, and it pairs naturally with the “Council of Trees” (random forests) issue. You use XGBoost yourself, and it’s the workhorse for table-style data like clinical records.
+13. GANs: The Forger and the Detective. Corvin forges fake lemonade labels while Lino learns to spot them, and both get better. It has a built-in villain, which suits Corvin.
+14. Diffusion models: The Snow Globe. Image generators learn to un-shake a snow globe: start from static and remove the noise step by step until a picture appears. Everyone has seen AI images, and almost no one knows how they’re made.
+15. Transfer learning and fine-tuning: The Chef Who Switched Kitchens. A pastry chef learns to make lemonade fast because she already knows the basics. It explains why big pretrained models can be adapted cheaply.
 
 ## Trust and responsibility: Concept	Story hook	Why it suits a comic
 1. Explainable AI (SHAP)	Teammates split credit fairly for a won game, which is how Shapley values work.	It’s underexplained to beginners and increasingly important in medicine and law.
