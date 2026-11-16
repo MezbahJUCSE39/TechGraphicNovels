@@ -1,4 +1,4 @@
-# TechGraphic Novels
+# TechGraphic Novels: <a herf="https://mezbahjucse39.github.io/TechGraphicNovels/"> Link </a>
 These are the ML concepts I think make strong graphic novels. Each has a clear visual metaphor, a natural conflict to build a story around, and a common beginner misunderstanding the story can fix. They’re in a suggested order, so each one builds on the last, and Maya and Lino could carry through as recurring characters.
 
 ## Foundations (natural sequels to linear regression)
